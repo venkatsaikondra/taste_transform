@@ -1,0 +1,279 @@
+/*.menu_container a,
+.menu_container p {
+  text-decoration: none;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 0;
+}
+
+.menu_bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  padding: 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 50; 
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+.menu_logo h1 {
+  font-size: 20px;
+  color: black;
+  cursor: pointer;
+  margin: 0;
+}
+
+.menu_open p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* The Full Screen Overlay *//*
+.menu_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 2em;
+  background-color: #c5fb45; 
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%); 
+}
+
+.menu_overlay_bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.menu_overlay_bar .menu_logo h1 { color: #000; }
+
+/* Resume Button Styling *//*
+.resume_wrapper {
+    margin-left: auto;
+    margin-right: 3rem;
+}
+
+.resume_btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #000;
+    transition: all 0.3s ease;
+}
+
+.resume_btn:hover {
+    background: #000;
+    color: #c5fb45;
+    transform: translateY(-2px);
+}
+
+.btn_icon {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.resume_btn:hover .btn_icon {
+    transform: translateY(2px);
+}
+
+.menu_close p {
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Links Section *//*
+.menu_copy {
+  flex: 1;
+  display: flex;
+  flex-direction: row; 
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 2em;
+}
+
+.menu_links {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu_link_item {
+  width: max-content;
+  overflow: hidden; 
+}
+
+.menu_link_item_holder {
+  transform: translateY(100%); /* Initial state for GSAP *//*
+}
+
+.menu_link {
+  font-size: clamp(40px, 8vw, 100px);
+  font-weight: 500;
+  line-height: 0.9;
+  color: #000;
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+}
+
+/* Modern hover effect for links *//*
+.menu_link:hover {
+    transform: skewX(-10deg) translateX(15px);
+    opacity: 0.7;
+}
+
+.menu_info {
+  display: flex;
+  gap: 4em;
+}
+
+.menu_info_col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu_info_col a, .menu_info_col p {
+  font-size: 12px;
+  color: #000;
+  font-weight: 600;
+}
+/* ... keep previous styles ... */
+/* Container for the nav items to ensure alignment *//*
+.menu_controls {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.resume_btn_nav {
+    font-family: var(--font-manrope); /* or your preferred sans-serif *//*
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    padding: 4px 0;
+    transition: letter-spacing 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+/* The Animated Underline *//*
+.resume_btn_nav::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: currentColor; /* Matches text color automatically *//*
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- Hover Effects --- *//*
+
+.resume_btn_nav:hover {
+    letter-spacing: 0.15em; /* Subtle expansion *//*
+    opacity: 0.8;
+}
+
+.resume_btn_nav:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* Icon Animation *//*
+.btn_icon {
+    display: inline-block;
+    font-size: 14px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.resume_btn_nav:hover .btn_icon {
+    transform: translateY(4px); /* Smooth downward nudge *//*
+}
+
+/* Mobile: Hide from the bar to keep it clean *//*
+@media (max-width: 768px) {
+    .resume_btn_nav {
+        display: none;
+    }
+}
+
+/* Mobile: Hide the extra resume button to prevent crowding *//*
+
+@media (max-width: 900px) {
+  .menu_copy { flex-direction: column; align-items: flex-start; padding-top: 4em; }
+  .resume_wrapper { display: none; } /* Hide in bar on mobile *//*
+  .menu_link { font-size: 14vw; }
+  .menu_info { width: 100%; margin-top: auto; gap: 2em; }
+}*/
+.menu_bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.menu_logo h1 {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: #c5fb45;
+  margin: 0;
+}
+
+.menu_controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav_link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.cta_button {
+  background: #c5fb45;
+  color: #000;
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.cta_button:hover {
+  transform: scale(1.05);
+}

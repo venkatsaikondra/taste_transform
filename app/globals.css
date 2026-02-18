@@ -1,10 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --neon-lime: #c5fb45;
+  --dark-bg: #0a0a0a;
+  --text-muted: #888;
 }
 
+body {
+  background-color: var(--dark-bg);
+  color: white;
+  margin: 0;
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
