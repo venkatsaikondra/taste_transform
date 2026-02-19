@@ -1,34 +1,39 @@
 import mongoose from "mongoose";
 
+declare global {
+  // Allow caching across module reloads in development
+  // eslint-disable-next-line no-var
+  var __mongooseGlobal: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } | undefined;
+}
+
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.warn('MONGO_URI is not defined. Database features will be disabled.');
+}
+
+/**
+ * Connect to MongoDB with caching to avoid multiple connections during
+ * Next.js hot reloads or serverless cold starts.
+ */
 export async function connect() {
-  try {
-    // Check if URI exists before trying to connect
-    const uri = process.env.MONGO_URI;
-    
-    if (!uri) {
-      throw new Error("MONGO_URI is not defined in your environment variables.");
-    }
+  if (!MONGO_URI) return;
 
-    // Check if we are already connected to avoid multiple connections in Dev
-    if (mongoose.connection.readyState >= 1) {
-      return;
-    }
-
-    await mongoose.connect(uri);
-
-    const connection = mongoose.connection;
-
-    connection.on("connected", () => {
-      console.log("✅ MongoDB connected successfully");
-    });
-
-    connection.on("error", (err) => {
-      console.error("❌ MongoDB connection error. Please make sure MongoDB is running. " + err);
-      process.exit();
-    });
-
-  } catch (error) {
-    console.error("❌ Something went wrong while connecting to DB");
-    console.error(error);
+  if (global.__mongooseGlobal && global.__mongooseGlobal.conn) {
+    return global.__mongooseGlobal.conn;
   }
+
+  if (!global.__mongooseGlobal) global.__mongooseGlobal = { conn: null, promise: null };
+
+  if (!global.__mongooseGlobal.promise) {
+    global.__mongooseGlobal.promise = mongoose.connect(MONGO_URI).then((mongooseInstance) => {
+      console.log('✅ MongoDB connected');
+      return mongooseInstance;
+    }).catch((err) => {
+      console.error('❌ MongoDB connection error:', err);
+      throw err;
+    });
+  }
+
+  global.__mongooseGlobal.conn = await global.__mongooseGlobal.promise;
+  return global.__mongooseGlobal.conn;
 }

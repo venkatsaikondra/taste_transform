@@ -53,6 +53,7 @@ const CATEGORIES = [
   },
 ];
 
+const VIBES = ['Safe', 'Experimental', 'Chaos'];
 
 type CartItem = {
   id: string;
@@ -115,6 +116,11 @@ export default function Fridge() {
   const cartRef = useRef<HTMLDivElement>(null);
   const particleIdRef = useRef(0);
 
+  // Recipe generation UI state
+  const [recipeText, setRecipeText] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
 
   const launchParticle = (emoji: string, itemRect: DOMRect) => {
@@ -162,6 +168,36 @@ export default function Fridge() {
   const vibeColor = vibe === 0 ? '#22c55e' : vibe === 1 ? '#f97316' : '#ec4899';
   const vibeLabel = VIBES[vibe];
 
+  // Generate recipe by sending selected ingredient names to the server route
+  async function generateRecipe() {
+    setGenError(null);
+    setRecipeText(null);
+    const ingredients = cart.map(c => c.name);
+    if (ingredients.length === 0) {
+      setGenError('Add some ingredients to the pot before generating a recipe.');
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const res = await fetch('/api/generate-recipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredients }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGenError(data?.error || 'Failed to generate recipe');
+      } else {
+        setRecipeText(data?.recipe ?? JSON.stringify(data));
+      }
+    } catch (err: any) {
+      setGenError(err?.message ?? String(err));
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   return (
     <div className={styles.root}>
       {/* Ambient background blobs */}
@@ -194,7 +230,7 @@ export default function Fridge() {
           <div className={styles.fridgeHeader}>
             <span className={styles.fridgeIcon}>❄️</span>
             <div>
-              <h1 className={styles.fridgeTitle}>Fridge</h1>
+              <h1 className={styles.fridgeTitle}>Digital Pantry</h1>
               <p className={styles.fridgeSub}>Pick your ingredients</p>
             </div>
           </div>
@@ -255,8 +291,8 @@ export default function Fridge() {
             )}
           </div>
 
-          
-          
+          {/* Vibe slider */}
+        </div>
 
         {/* ── RIGHT: Cooking Pot / Cart ── */}
         <div className={styles.pot} ref={cartRef}>
@@ -301,7 +337,15 @@ export default function Fridge() {
                 <span>Total Calories</span>
                 <span className={styles.totalCal}>{totalCal} kcal</span>
               </div>
-        
+              <button
+                className={styles.cookBtn}
+                style={{ '--vibe-color': vibeColor } as React.CSSProperties}
+                onClick={() => generateRecipe()}
+                disabled={generating}
+              >
+                <span>{generating ? 'Generating…' : `Cook with ${vibeLabel} Mode`}</span>
+                <span>{vibe === 0 ? '🍽️' : vibe === 1 ? '🔬' : '🚀'}</span>
+              </button>
               <button className={styles.clearBtn} onClick={() => setCart([])}>
                 Clear Pot
               </button>
@@ -309,7 +353,24 @@ export default function Fridge() {
           )}
         </div>
       </div>
+      
+        {/* Recipe viewer panel */}
+        {recipeText && (
+          <div className={styles.recipePanel}>
+            <div className={styles.recipeHeader}>
+              <h3>AI Recipe</h3>
+              <div>
+                <button onClick={() => { navigator.clipboard?.writeText(recipeText); }} className={styles.smallBtn}>Copy</button>
+                <button onClick={() => setRecipeText(null)} className={styles.smallBtn}>Close</button>
+              </div>
+            </div>
+            <pre className={styles.recipeBody}>{recipeText}</pre>
+          </div>
+        )}
+
+        {genError && (
+          <div className={styles.genError}>{genError}</div>
+        )}
     </div>
   );
-  
-  }
+}
