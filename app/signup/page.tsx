@@ -12,14 +12,14 @@ export default function Signup() {
   const [loading, setLoading] = useState(false)
 
   const onSignup = async (e: React.FormEvent) => {
-    e.preventDefault(); // Added to prevent default form behavior
+    e.preventDefault();
     try {
       setLoading(true)
-      const response = await axios.post("/api/users/signup", user)
-      toast.success("Account created! Redirecting...")
+      await axios.post("/api/users/signup", user)
+      toast.success("Identity Registered Successfully")
       router.push("/login")
     } catch (error: any) {
-      const message = error.response?.data?.error || "Signup failed"
+      const message = error.response?.data?.error || "Registration Failure"
       toast.error(message)
     } finally {
       setLoading(false)
@@ -32,58 +32,65 @@ export default function Signup() {
   }, [user])
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-10 shadow-2xl shadow-gray-200/50">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-black">Join The <span className="text-orange-500">WALL</span></h1>
-          <p className="mt-2 text-sm text-gray-500">Create your account to get started.</p>
+    <div className="flex min-h-screen items-center justify-center bg-[#050505] px-4 font-mono">
+      {/* Background Grid - Same as Login for consistency */}
+      <div className="fixed inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(#c5fb45 1px, transparent 1px), linear-gradient(90deg, #c5fb45 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
+      <div className="relative w-full max-w-md border border-zinc-800 bg-black/80 p-8 backdrop-blur-xl">
+        {/* Tech Corner Accents */}
+        <div className="absolute -left-1 -top-1 h-4 w-4 border-l-2 border-t-2 border-[#c5fb45]" />
+        <div className="absolute -right-1 -bottom-1 h-4 w-4 border-r-2 border-b-2 border-[#c5fb45]" />
+
+        <div className="mb-8">
+          <h1 className="text-2xl font-black tracking-tighter text-white">NEW_ENTITY_REGISTRATION</h1>
+          <p className="text-xs uppercase tracking-widest text-zinc-500">System Integration Required</p>
         </div>
 
         <form onSubmit={onSignup} className="space-y-5">
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Username</label>
+          <div className="group">
+            <label className="text-[10px] uppercase text-[#c5fb45]">Username</label>
             <input
               type="text"
-              placeholder="johndoe"
+              placeholder="alias_01"
               value={user.username}
               onChange={(e) => setUser({ ...user, username: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-black outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              className="mt-1 w-full border-b border-zinc-800 bg-transparent py-2 text-sm text-white outline-none transition-all placeholder:text-zinc-700 focus:border-[#c5fb45]"
             />
           </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Email Address</label>
+          <div className="group">
+            <label className="text-[10px] uppercase text-[#c5fb45]">Email_Address</label>
             <input
               type="email"
-              placeholder="name@company.com"
+              placeholder="user@network.com"
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-black outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              className="mt-1 w-full border-b border-zinc-800 bg-transparent py-2 text-sm text-white outline-none transition-all placeholder:text-zinc-700 focus:border-[#c5fb45]"
             />
           </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Password</label>
+          <div className="group">
+            <label className="text-[10px] uppercase text-[#c5fb45]">Password</label>
             <input
               type="password"
               placeholder="••••••••"
               value={user.password}
               onChange={(e) => setUser({ ...user, password: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-black outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+              className="mt-1 w-full border-b border-zinc-800 bg-transparent py-2 text-sm text-white outline-none transition-all placeholder:text-zinc-700 focus:border-[#c5fb45]"
             />
           </div>
 
           <button
             type="submit"
             disabled={buttonDisabled || loading}
-            className="w-full rounded-xl bg-black py-4 text-sm font-bold text-white shadow-lg transition-all hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+            className="w-full bg-[#c5fb45] py-4 text-xs font-bold uppercase tracking-widest text-black transition-all hover:bg-[#d4ff6b] active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
           >
-            {loading ? "Creating Account..." : "Sign Up"}
+            {loading ? "Transmitting..." : "Initialize_Registry"}
           </button>
         </form>
 
-        <p className="mt-8 text-center text-sm text-gray-500">
-          Already a member? <Link href="/login" className="font-bold text-black hover:text-orange-600">Log in</Link>
+        <p className="mt-8 text-center text-[10px] uppercase tracking-widest text-zinc-600">
+          Already synced? <Link href="/login" className="text-white hover:text-[#c5fb45]">Return_To_Login</Link>
         </p>
       </div>
     </div>

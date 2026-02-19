@@ -126,6 +126,7 @@ import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import styles from "@/components/Main/main.module.css";
+import { useRouter } from 'next/navigation';
 import Main from "@/public/Animations/main.json"
 import Lottie from "lottie-react";
 
@@ -150,6 +151,7 @@ const First = () => {
         duration: 1.5,
     }, "<");
   }, { scope: container });
+  const router = useRouter();
 
   return (
     <section ref={container} className={styles.hero}>
@@ -164,8 +166,13 @@ const First = () => {
             Input your ingredients. Let the LLM hallucinate your next five-star meal.
           </p>
           <div className={styles.btn_group}>
-             <button className={styles.main_btn}>START SCANNING</button>
-          </div>
+      <button 
+        className={styles.main_btn} 
+        onClick={() => router.push('/fridge')}
+      >
+        START SCANNING
+      </button>
+    </div>
         </div>
 
         <div className={styles.right}>

@@ -2,7 +2,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { signToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,21 +21,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid password" }, { status: 400 });
     }
 
-    // Create token data
+    // Create token data and sign
     const tokenData = { id: user._id, username: user.username, email: user.email };
-    
-    // Create token
-    const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET!, { expiresIn: "1d" });
+    const token = signToken(tokenData);
 
-    const response = NextResponse.json({
-      message: "Login successful",
-      success: true,
-    });
-
-    // Set cookie
-    response.cookies.set("token", token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production"
+    const response = NextResponse.json({ message: "Login successful", success: true });
+    // Set a secure, httpOnly cookie. Use SameSite=Lax to allow top-level navigation.
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24,
     });
 
     return response;
