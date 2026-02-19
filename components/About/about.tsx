@@ -1,141 +1,85 @@
-"use client"
+"use client";
 import { useRef } from "react";
-import Image from "next/image";
 import styles from "./about.module.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-
+import Lottie from "lottie-react";
+import Food2 from '@/public/Animations/Food Carousel.json';
+import Food1 from '@/public/Animations/food.json';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function About() {
-  // Specify the type within the angle brackets < >
-const container = useRef<HTMLDivElement>(null);
-const leftCol = useRef<HTMLDivElement>(null);
-const rightCol = useRef<HTMLUListElement>(null); // rightCol is a <ul>
-const image1 = useRef<HTMLDivElement>(null);
-const image2 = useRef<HTMLDivElement>(null);
+  const container = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
- useGSAP(() => {
-    // 1. Text and Points Reveal
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container.current,
-        start: "top 80%",
-        end: "bottom 20%",
-        // Key change here: play on enter, reverse on leave, 
-        // play again on re-entry from bottom, reverse on leave top.
-        toggleActions: "play reverse play reverse", 
-      },
-    });
-
-    tl.from(leftCol.current?.children || [], {
+  useGSAP(() => {
+    gsap.from(contentRef.current, {
       y: 50,
       opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: "power3.out",
-    })
-    .from(rightCol.current?.querySelectorAll("li") || [], {
-      x: 30,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: "power3.out"
-    }, "-=0.4");
-
-    // 2. Parallax (Scrubbing animations naturally "repeat" based on scroll position)
-    gsap.to(image1.current, {
-      y: -60,
-      ease: "none",
+      duration: 1,
       scrollTrigger: {
         trigger: container.current,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true,
-      }
+        start: "top 75%",
+      },
     });
-
-    gsap.to(image2.current, {
-      y: 60,
-      ease: "none",
-      scrollTrigger: {
-        trigger: container.current,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true,
-      }
-    });
-
   }, { scope: container });
+
   return (
     <section className={styles.about} id="about" ref={container}>
-      <div className={styles.inner}>
+      <div className={styles.inner} ref={contentRef}>
+        
+        {/* LEFT COLUMN: The Story */}
+        <div className={styles.left}>
+          {/* Top Animation for visual hook */}
+          <div className={styles.lottie_top}>
+            <Lottie animationData={Food1} loop={true} />
+          </div>
 
-        {/* LEFT COLUMN */}
-        <div className={styles.left} ref={leftCol}>
-          <h2>ABOUT ME</h2>
-
+          <h2 className={styles.label}>THE MISSION</h2>
+          <h3 className={styles.title}>Ending "Fridge Fatigue" with LLMs.</h3>
+          
           <p className={styles.description}>
-            I lead the Executive Development Center at Sukkur IBA University,
-            leading projects with global partners like USAID, UNDP, UNICEF,
-            and the EU. With 15,000+ lives impacted, my work drives
-            entrepreneurship, climate action, youth empowerment, and rural
-            development — recognized by the UN for its impact.
+            Foodzilla was born out of the common kitchen dilemma: a fridge full of 
+            random ingredients and zero inspiration. We use Large Language Models 
+            to bridge the gap between waste and taste.
           </p>
 
-          <div className={styles.metric}>
-            <span className={styles.icon}>🌍</span>
-            <div>
-              <strong>25+</strong>
-              <p>
-                Collaborated with 20+ international partners, with 4
-                partnerships involving UN affiliated and globally recognized
-                organizations.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.arrow}>↗</div>
+         
         </div>
 
-        {/* RIGHT COLUMN */}
+        {/* RIGHT COLUMN: The Features */}
         <div className={styles.right}>
-          <div className={styles.imageLarge} ref={image1}>
-            <Image
-              src="/about-1.jpg"
-              alt="Leadership"
-              fill
-              className={styles.image}
-            />
-          </div>
-
-          <div className={styles.imageSmall} ref={image2}>
-            <Image
-              src="/about-2.jpg"
-              alt="Collaboration"
-              fill
-              className={styles.image}
-            />
-          </div>
-
-          <ul className={styles.points} ref={rightCol}>
+          <ul className={styles.points}>
             <li>
-              <strong>Transformative Leadership</strong> — Guided AACSB-accredited
-              universities to become catalysts for community empowerment and
-              innovation.
+              <span className={styles.pointNumber}>01</span>
+              <div>
+                <strong>Zero Waste Vision</strong>
+                <p>Helping you use that half-used jar of pesto before it becomes a science project.</p>
+              </div>
             </li>
 
             <li>
-              <strong>Bridge Builder & Connector</strong> — Built impactful
-              networks by fostering partnerships with USAID, UNDP, UNICEF, and
-              global universities.
+              <span className={styles.pointNumber}>02</span>
+              <div>
+                <strong>Hallucinated Creativity</strong>
+                <p>Our AI suggests cooking steps that push the boundaries of traditional culinary arts.</p>
+              </div>
             </li>
 
             <li>
-              <strong>Future-Forward Visionary</strong> — Pioneered green
-              entrepreneurship programs that align business success with
-              environmental responsibility.
+              <span className={styles.pointNumber}>03</span>
+              <div>
+                <strong>Instant Planning</strong>
+                <p>From "I have nothing to eat" to a full recipe in under 2 seconds.</p>
+              </div>
+            </li>
+            
+            {/* Bottom Animation to balance the right side */}
+            <li className={styles.lottie_list_item}>
+              <div className={styles.lottie_small}>
+                <Lottie animationData={Food2} loop={true} />
+              </div>
             </li>
           </ul>
         </div>

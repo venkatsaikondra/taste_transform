@@ -1,246 +1,111 @@
-
 .about {
-
-background: #b311f4;
-
-padding: 140px 0;
-
-}
-.about {
-  background: #fff;
-  padding: 140px 0;
-  overflow: hidden; /* Prevent parallax from bleeding out */
-}
-
-/* Add a revealing clip-path to the images for a more cinematic look */
-.imageLarge, .imageSmall {
-  position: relative;
+  background: #0a0a0a;
+  padding: 120px 0;
+  color: #fff;
   overflow: hidden;
-  border-radius: 4px; /* Optional: Slight rounded edges look modern */
 }
-
-/* Ensure images have a bit of scale to allow parallax without showing white space */
-.image {
-  object-fit: cover;
-  transform: scale(1.1);
-}
-
-/* Improved spacing for the metric */
-.metric {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 40px;
-  border-left: 2px solid #f0f0f0;
-  padding-left: 24px;
-}
-
-/* This creates a nice hover effect on the arrow if you want it interactive */
-.arrow {
-  display: inline-block;
-  font-size: 48px;
-  color: #aaa;
-  transition: transform 0.3s ease, color 0.3s ease;
-  cursor: pointer;
-}
-
-.arrow:hover {
-  transform: translate(5px, -5px);
-  color: #000;
-}
-
 
 .inner {
-
-width: 90%;
-
-max-width: 1400px;
-
-margin: 0 auto;
-
-
-
-display: grid;
-
-grid-template-columns: 1.1fr 1fr;
-
-gap: 80px;
-
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: flex-start;
 }
 
-
-
-/* LEFT */
-
-.left h2 {
-
-font-size: 14px;
-
-letter-spacing: 1px;
-
-margin-bottom: 24px;
-
+/* Lottie Spacing */
+.lottie_top {
+  width: 150px;
+  margin-bottom: 2rem;
 }
 
+.lottie_small {
+  width: 200px;
+  margin-top: 20px;
+}
 
+.lottie_list_item {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+}
+
+.label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #c5fb45;
+  margin-bottom: 15px;
+}
+
+.title {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 25px;
+}
 
 .description {
-
-font-size: 15px;
-
-line-height: 1.7;
-
-color: #333;
-
-margin-bottom: 40px;
-
-max-width: 420px;
-
+  font-size: 16px;
+  line-height: 1.7;
+  color: #aaa;
+  margin-bottom: 40px;
 }
-
-
 
 .metric {
-
-display: flex;
-
-gap: 16px;
-
-margin-bottom: 40px;
-
+  display: flex;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-
-
-
-.icon {
-
-font-size: 20px;
-
-}
-
-
 
 .metric strong {
-
-font-size: 28px;
-
-display: block;
-
+  font-size: 18px;
+  color: #c5fb45;
+  display: block;
 }
 
-
-
-.metric p {
-
-font-size: 13px;
-
-color: #555;
-
-max-width: 320px;
-
-}
-
-
-
-.arrow {
-
-font-size: 48px;
-
-color: #aaa;
-
-}
-
-
-
-/* RIGHT */
-
-.right {
-
-position: relative;
-
-}
-
-
-
-.imageLarge {
-
-position: relative;
-
-width: 100%;
-
-height: 280px;
-
-margin-bottom: 24px;
-
-}
-
-
-
-.imageSmall {
-
-position: relative;
-
-width: 70%;
-
-height: 200px;
-
-margin-bottom: 32px;
-
-}
-
-
-.image {
-  object-fit: cover;
-  transform: scale(1.2); /* Gives extra room for the image to move up/down */
-}
-
+/* Right Column */
 .points {
-
-list-style: none;
-
-padding: 0;
-
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 45px;
 }
-
-
 
 .points li {
-
-font-size: 14px;
-
-line-height: 1.6;
-
-margin-bottom: 18px;
-
-color: #333;
-
+  display: flex;
+  gap: 20px;
 }
 
-
+.pointNumber {
+  font-size: 20px;
+  font-weight: 800;
+  color: #c5fb45;
+  font-family: monospace;
+}
 
 .points strong {
-
-font-weight: 600;
-
+  font-size: 20px;
+  display: block;
+  margin-bottom: 5px;
 }
 
-
-
-/* Responsive */
+.points p {
+  font-size: 15px;
+  color: #888;
+  line-height: 1.5;
+}
 
 @media (max-width: 900px) {
-
-.inner {
-
-grid-template-columns: 1fr;
-
-}
-
-
-
-.imageSmall {
-
-width: 100%;
-
-}
-
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  .lottie_top { width: 100px; }
 }
