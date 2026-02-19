@@ -90,7 +90,7 @@ export default function Signup() {
         </form>
 
         <p className="mt-8 text-center text-[10px] uppercase tracking-widest text-zinc-600">
-          Already synced? <Link href="/login" className="text-white hover:text-[#c5fb45]">Return_To_Login</Link>
+          Already Registered? <Link href="/login" className="text-white hover:text-[#c5fb45]">Return_To_Login</Link>
         </p>
       </div>
     </div>
