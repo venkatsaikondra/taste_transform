@@ -10,20 +10,26 @@ export default function LoginPage() {
   const [user, setUser] = useState({ email: "", password: "" })
   const [loading, setLoading] = useState(false)
 
-  const onLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      setLoading(true)
-      await axios.post("/api/users/login", user)
-      toast.success("Access Granted")
-      const params = new URLSearchParams(window.location.search);
-      router.push(params.get('from') || '/');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Authentication Failed")
-    } finally {
-      setLoading(false)
-    }
+ const onLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    setLoading(true);
+    // Send request
+    const response = await axios.post("/api/users/login", user);
+    
+    // Success feedback
+    toast.success(`Welcome back, ${response.data.user.username}!`);
+    
+    const params = new URLSearchParams(window.location.search);
+    router.push(params.get('from') || '/');
+  } catch (error: any) {
+    // This catches "User does not exist" or "Invalid password" from the backend
+    const errorMessage = error.response?.data?.error || "Authentication Failed";
+    toast.error(errorMessage);
+  } finally {
+    setLoading(false);
   }
+};
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#050505] px-4 font-mono">
