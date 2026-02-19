@@ -2,47 +2,40 @@ import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
-
 export async function POST(request: NextRequest) {
   try {
-    // 1. Ensure DB Connection is active
     await connect();
+    const { username, email, password } = await request.json();
 
-    // 2. Parse body
-    const reqBody = await request.json();
-    const { username, email, password } = reqBody;
-
-    // Basic Validation
-    if (!username || !email || !password) {
-        return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    // 1. Check if Username is taken
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return NextResponse.json({ error: "Username already exists" }, { status: 400 });
     }
 
-    // 3. Check for existing user
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    // 2. Check if Email is taken
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return NextResponse.json({ error: "Email already registered" }, { status: 400 });
     }
 
-    // 4. Secure Password
+    // 3. Hash and Save
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
-    // 5. Save to MongoDB
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
+    const newUser = new User({ username, email, password: hashedPassword });
     const savedUser = await newUser.save();
 
     return NextResponse.json({
       message: "User created successfully",
       success: true,
-      userId: savedUser._id
     }, { status: 201 });
 
   } catch (error: any) {
+    // Catch-all for MongoDB unique errors that might slip through
+    if (error.code === 11000) {
+      return NextResponse.json({ error: "Username or Email already in use" }, { status: 400 });
+    }
     console.error("Signup Error:", error.message);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
