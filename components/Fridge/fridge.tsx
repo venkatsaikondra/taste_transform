@@ -311,4 +311,5 @@ export default function Fridge() {
       </div>
     </div>
   );
-}
+  
+  }
