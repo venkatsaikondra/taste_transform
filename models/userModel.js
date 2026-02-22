@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema(
     forgotPasswordTokenExpiry: Date,
     verifyToken: String,
     verifyTokenExpiry: Date,
+    recipes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Recipe",
+      },
+    ],
   },
   { timestamps: true }
 );

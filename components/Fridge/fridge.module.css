@@ -611,3 +611,216 @@
   from { transform: scale(0); opacity: 1; }
   to   { transform: scale(4); opacity: 0; }
 }
+
+/* ── Recipe Section (Inline) ──────────────────────────────────────────────── */
+.recipeSection {
+  width: 100%;
+  max-width: 1100px;
+  margin: 2rem auto 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(197, 251, 69, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  padding: 1.5rem;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recipeSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recipeSectionTitle {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #c5fb45;
+  letter-spacing: -0.02em;
+}
+
+.recipeActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.saveBtnSmall {
+  background: rgba(197, 251, 69, 0.15);
+  border: 1px solid rgba(197, 251, 69, 0.3);
+  color: #c5fb45;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.saveBtnSmall:hover:not(:disabled) {
+  background: rgba(197, 251, 69, 0.25);
+  border-color: #c5fb45;
+  transform: translateY(-2px);
+}
+
+.saveBtnSmall:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.saveBtnSuccess {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.iconBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(197, 251, 69, 0.3);
+  color: #c5fb45;
+}
+
+.recipeBody {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.5rem;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.recipeHeader {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #c5fb45;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.recipeHeader:first-child {
+  margin-top: 0;
+}
+
+.recipeParagraph {
+  margin: 0.75rem 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.recipeListItem {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+  padding-left: 0.5rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.listBullet {
+  color: #c5fb45;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.recipeBody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recipeBody::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.recipeBody::-webkit-scrollbar-thumb {
+  background: rgba(197, 251, 69, 0.3);
+  border-radius: 10px;
+}
+
+.recipeBody::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 251, 69, 0.5);
+}
+
+.genError {
+  width: 100%;
+  max-width: 1100px;
+  margin: 1rem auto 0;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .recipeSection {
+    margin: 1.5rem 0 0;
+    padding: 1.25rem;
+  }
+
+  .recipeSectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .recipeSectionTitle {
+    font-size: 1.2rem;
+  }
+
+  .recipeBody {
+    max-height: 350px;
+    font-size: 0.85rem;
+    padding: 1.25rem;
+  }
+
+  .genError {
+    margin: 1rem 0 0;
+    padding: 0.875rem;
+    font-size: 0.85rem;
+  }
+}

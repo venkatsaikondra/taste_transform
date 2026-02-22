@@ -120,6 +120,8 @@ export default function Fridge() {
   const [recipeText, setRecipeText] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
 
@@ -168,10 +170,46 @@ export default function Fridge() {
   const vibeColor = vibe === 0 ? '#22c55e' : vibe === 1 ? '#f97316' : '#ec4899';
   const vibeLabel = VIBES[vibe];
 
+  // Parse and format recipe text
+  const formatRecipeText = (text: string) => {
+    const lines = text.split('\n');
+    const formatted: { type: string; content: string }[] = [];
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      // Remove all markdown formatting variations
+      let cleaned = trimmed
+        .replace(/\*\*([^*]+)\*\*/g, '$1')  // **text** anywhere in line
+        .replace(/\*([^*]+)\*/g, '$1')      // *text* anywhere in line
+        .replace(/^\* /, '')                // * at start
+        .replace(/^\- /, '');               // - at start
+
+      // Detect section headers (including compound phrases)
+      if (cleaned.match(/^(recipe\s*name|recipe|name|ingredients?|steps?|instructions?|directions?|tips?|variations?|tips\s+and\s+variations?):/i)) {
+        formatted.push({ type: 'header', content: cleaned });
+      }
+      // Detect list items (including numbered lists)
+      else if (line.match(/^\s*[\*\-•]\s+/) || line.match(/^\s*\d+[\.)]\s+/)) {
+        // Remove list markers and clean
+        cleaned = cleaned.replace(/^\d+[\.)]\s*/, '');
+        formatted.push({ type: 'list', content: cleaned });
+      }
+      // Regular paragraph
+      else {
+        formatted.push({ type: 'text', content: cleaned });
+      }
+    }
+    
+    return formatted;
+  };
+
   // Generate recipe by sending selected ingredient names to the server route
   async function generateRecipe() {
     setGenError(null);
     setRecipeText(null);
+    setSaveSuccess(false);
     const ingredients = cart.map(c => c.name);
     if (ingredients.length === 0) {
       setGenError('Add some ingredients to the pot before generating a recipe.');
@@ -195,6 +233,49 @@ export default function Fridge() {
       setGenError(err?.message ?? String(err));
     } finally {
       setGenerating(false);
+    }
+  }
+
+  // Save recipe to dashboard
+  async function saveRecipe() {
+    if (!recipeText) return;
+
+    setSaving(true);
+    setSaveSuccess(false);
+    try {
+      // Extract recipe name from the text (usually first line)
+      const lines = recipeText.split('\n').filter(l => l.trim());
+      const recipeName = lines[0]?.replace(/^(recipe:|name:)/i, '').trim() || 'Untitled Recipe';
+
+      const res = await fetch('/api/recipes/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipeName,
+          ingredients: cart.map(c => ({ name: c.name, emoji: c.emoji, quantity: c.qty })),
+          steps: recipeText,
+          vibe: vibeLabel,
+          totalCalories: totalCal,
+          recipeText,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setGenError('Please log in to save recipes');
+        } else {
+          setGenError(data?.error || 'Failed to save recipe');
+        }
+      } else {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (err: unknown) {
+      setGenError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -354,23 +435,54 @@ export default function Fridge() {
         </div>
       </div>
       
-        {/* Recipe viewer panel */}
-        {recipeText && (
-          <div className={styles.recipePanel}>
-            <div className={styles.recipeHeader}>
-              <h3>AI Recipe</h3>
-              <div>
-                <button onClick={() => { navigator.clipboard?.writeText(recipeText); }} className={styles.smallBtn}>Copy</button>
-                <button onClick={() => setRecipeText(null)} className={styles.smallBtn}>Close</button>
-              </div>
+      {/* Recipe viewer section - inline below ingredients */}
+      {recipeText && (
+        <div className={styles.recipeSection}>
+          <div className={styles.recipeSectionHeader}>
+            <h3 className={styles.recipeSectionTitle}>🍳 Your Recipe</h3>
+            <div className={styles.recipeActions}>
+              <button 
+                onClick={saveRecipe} 
+                className={`${styles.saveBtnSmall} ${saveSuccess ? styles.saveBtnSuccess : ''}`}
+                disabled={saving || saveSuccess}
+                title="Save to Dashboard"
+              >
+                {saving ? '💾' : saveSuccess ? '✓' : '💾'}
+              </button>
+              <button onClick={() => { navigator.clipboard?.writeText(recipeText); }} className={styles.iconBtn} title="Copy">📋</button>
+              <button onClick={() => setRecipeText(null)} className={styles.iconBtn} title="Close">✕</button>
             </div>
-            <pre className={styles.recipeBody}>{recipeText}</pre>
           </div>
-        )}
+          <div className={styles.recipeBody}>
+            {formatRecipeText(recipeText).map((item, idx) => {
+              if (item.type === 'header') {
+                return (
+                  <h4 key={idx} className={styles.recipeHeader}>
+                    {item.content}
+                  </h4>
+                );
+              } else if (item.type === 'list') {
+                return (
+                  <div key={idx} className={styles.recipeListItem}>
+                    <span className={styles.listBullet}>•</span>
+                    <span>{item.content}</span>
+                  </div>
+                );
+              } else {
+                return (
+                  <p key={idx} className={styles.recipeParagraph}>
+                    {item.content}
+                  </p>
+                );
+              }
+            })}
+          </div>
+        </div>
+      )}
 
-        {genError && (
-          <div className={styles.genError}>{genError}</div>
-        )}
+      {genError && (
+        <div className={styles.genError}>{genError}</div>
+      )}
     </div>
   );
 }
