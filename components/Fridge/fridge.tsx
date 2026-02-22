@@ -873,70 +873,89 @@ export default function Fridge() {
         </div>
       </div>
 
-      {/* Recipe viewer section - inline below ingredients */}
-      {recipeText && (
-        <div className={styles.recipeSection}>
-          <div className={styles.recipeSectionHeader}>
-            <h3 className={styles.recipeSectionTitle}>🍳 Your Recipe</h3>
-            <div className={styles.recipeActions}>
-              <button 
-                onClick={saveRecipe} 
-                className={`${styles.saveBtnSmall} ${saveSuccess ? styles.saveBtnSuccess : ''}`}
-                disabled={saving || saveSuccess}
-                title="Save to Dashboard"
-              >
-                {saving ? '💾' : saveSuccess ? '✓' : '💾'}
-              </button>
-              <button onClick={() => { navigator.clipboard?.writeText(recipeText); }} className={styles.iconBtn} title="Copy">📋</button>
-              <button onClick={() => { setRecipeText(null); setVideos([]); setGenError(null); }} className={styles.iconBtn} title="Close">✕</button>
+      {/* ── LLM + YouTube Generation Section ── */}
+      {(recipeText || generating) && (
+        <div className={styles.generationWrapper}>
+          <div className={styles.recipeCard}>
+            <div className={styles.recipeHeader}>
+              <h2 className={styles.glowText}>GENERATED_RECIPE.exe</h2>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button 
+                  onClick={saveRecipe} 
+                  className={`${styles.saveBtnSmall} ${saveSuccess ? styles.saveBtnSuccess : ''}`}
+                  disabled={saving || saveSuccess}
+                  title="Save to Dashboard"
+                  style={{ fontSize: '1rem', padding: '0.4rem 0.6rem' }}
+                >
+                  {saving ? '💾' : saveSuccess ? '✓ Saved' : '💾'}
+                </button>
+                <button
+                  onClick={() => { setRecipeText(null); setVideos([]); setGenError(null); }}
+                  className={styles.closeBtn}
+                >
+                  ×
+                </button>
+              </div>
             </div>
-          </div>
-          <div className={styles.recipeBody}>
-            {formatRecipeText(recipeText).map((item, idx) => {
-              if (item.type === 'header') {
-                return (
-                  <h4 key={idx} className={styles.recipeHeader}>
-                    {item.content}
-                  </h4>
-                );
-              } else if (item.type === 'list') {
-                return (
-                  <div key={idx} className={styles.recipeListItem}>
-                    <span className={styles.listBullet}>•</span>
-                    <span>{item.content}</span>
-                  </div>
-                );
-              } else {
-                return (
-                  <p key={idx} className={styles.recipeParagraph}>
-                    {item.content}
-                  </p>
-                );
-              }
-            })}
-          </div>
-        </div>
-      )}
 
-      {/* YouTube video recommendations */}
-      {videos.length > 0 && (
-        <div className={styles.videoSection}>
-          <h3 className={styles.videoHeading}>VISUAL_GUIDES_FOUND</h3>
-          <div className={styles.videoGrid}>
-            {videos.map((vid) => (
-              <a
-                key={vid.videoId}
-                href={`https://youtube.com/watch?v=${vid.videoId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.videoCard}
-              >
-                <img src={vid.thumbnail} alt={vid.title} />
-                <p>{vid.title}</p>
-                <span className={styles.watchBadge}>▶ WATCH_TUTORIAL</span>
-              </a>
-            ))}
+            {generating ? (
+              <div className={styles.loadingPulse}>
+                <span className={styles.loadingDot} />
+                <span className={styles.loadingDot} />
+                <span className={styles.loadingDot} />
+                <span>Analyzing ingredients &amp; crafting recipe…</span>
+              </div>
+            ) : (
+              <div className={styles.recipeContent}>
+                <div className={styles.recipeBody}>
+                  {formatRecipeText(recipeText || '').map((item, idx) => {
+                    if (item.type === 'header') {
+                      return (
+                        <h4 key={idx} className={styles.recipeHeaderText}>
+                          {item.content}
+                        </h4>
+                      );
+                    } else if (item.type === 'list') {
+                      return (
+                        <div key={idx} className={styles.recipeListItem}>
+                          <span className={styles.listBullet}>•</span>
+                          <span>{item.content}</span>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <p key={idx} className={styles.recipeParagraph}>
+                          {item.content}
+                        </p>
+                      );
+                    }
+                  })}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* YouTube Recommendations */}
+          {videos.length > 0 && (
+            <div className={styles.videoSection}>
+              <h3 className={styles.videoHeading}>VISUAL_GUIDES_FOUND</h3>
+              <div className={styles.videoGrid}>
+                {videos.map((vid) => (
+                  <a
+                    key={vid.videoId}
+                    href={`https://youtube.com/watch?v=${vid.videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.videoCard}
+                  >
+                    <img src={vid.thumbnail} alt={vid.title} />
+                    <p>{vid.title}</p>
+                    <span className={styles.watchBadge}>▶ WATCH_TUTORIAL</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
