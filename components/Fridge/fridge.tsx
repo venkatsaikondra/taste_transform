@@ -385,6 +385,8 @@ export default function Fridge() {
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const [videos, setVideos] = useState<VideoResult[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
 
@@ -464,11 +466,44 @@ export default function Fridge() {
   const vibeColor = vibe === 0 ? '#22c55e' : vibe === 1 ? '#f97316' : '#ec4899';
   const vibeLabel = VIBES[vibe];
 
+  // Format recipe text by removing markdown and detecting sections
+  const formatRecipeText = (text: string) => {
+    const formatted: Array<{ type: 'header' | 'list' | 'text'; content: string }> = [];
+    const lines = text.split('\n');
+    
+    for (let line of lines) {
+      let cleaned = line.trim();
+      if (!cleaned) continue;
+      
+      // Remove markdown bold/italic
+      cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
+      cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+      
+      // Detect headers
+      if (
+        /^(Recipe Name|Ingredients|Instructions|Steps|Tips and Variations|Notes|Nutrition|Servings)/i.test(cleaned)
+      ) {
+        formatted.push({ type: 'header', content: cleaned });
+      }
+      // Detect list items
+      else if (/^[-•*]\s/.test(cleaned)) {
+        cleaned = cleaned.replace(/^[-•*]\s/, '');
+        formatted.push({ type: 'list', content: cleaned });
+      }
+      else {
+        formatted.push({ type: 'text', content: cleaned });
+      }
+    }
+    
+    return formatted;
+  };
+
   // ── Recipe generation ────────────────────────────────────────────────────────
   async function generateRecipe() {
-    setGenError(null);
+   setGenError(null);
     setRecipeText(null);
     setVideos([]);
+    setSaveSuccess(false);
 
     const ingredients = cart.map(c => c.name);
     if (ingredients.length === 0) {
@@ -508,6 +543,44 @@ export default function Fridge() {
       setGenError(err instanceof Error ? err.message : 'Network error. Please try again.');
     } finally {
       setGenerating(false);
+    }
+  }
+
+  // Save recipe to dashboard
+  async function saveRecipe() {
+    if (!recipeText) return;
+
+    setSaving(true);
+    setSaveSuccess(false);
+    try {
+      // Extract recipe name from the text (usually first line)
+      const lines = recipeText.split('\n').filter(l => l.trim());
+      const recipeName = lines[0]?.replace(/^(recipe:|name:)/i, '').trim() || 'Untitled Recipe';
+
+      const res = await fetch('/api/recipes/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipeName,
+          ingredients: cart.map(c => ({ name: c.name, emoji: c.emoji, quantity: c.qty })),
+          steps: recipeText,
+          vibe: vibeLabel,
+          totalCalories: totalCal,
+          recipeText,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Save error:', data.error);
+      } else {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -806,12 +879,23 @@ export default function Fridge() {
           <div className={styles.recipeCard}>
             <div className={styles.recipeHeader}>
               <h2 className={styles.glowText}>GENERATED_RECIPE.exe</h2>
-              <button
-                onClick={() => { setRecipeText(null); setVideos([]); setGenError(null); }}
-                className={styles.closeBtn}
-              >
-                ×
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button 
+                  onClick={saveRecipe} 
+                  className={`${styles.saveBtnSmall} ${saveSuccess ? styles.saveBtnSuccess : ''}`}
+                  disabled={saving || saveSuccess}
+                  title="Save to Dashboard"
+                  style={{ fontSize: '1rem', padding: '0.4rem 0.6rem' }}
+                >
+                  {saving ? '💾' : saveSuccess ? '✓ Saved' : '💾'}
+                </button>
+                <button
+                  onClick={() => { setRecipeText(null); setVideos([]); setGenError(null); }}
+                  className={styles.closeBtn}
+                >
+                  ×
+                </button>
+              </div>
             </div>
 
             {generating ? (
@@ -823,7 +907,30 @@ export default function Fridge() {
               </div>
             ) : (
               <div className={styles.recipeContent}>
-                <pre className={styles.recipeTextOutput}>{recipeText}</pre>
+                <div className={styles.recipeBody}>
+                  {formatRecipeText(recipeText || '').map((item, idx) => {
+                    if (item.type === 'header') {
+                      return (
+                        <h4 key={idx} className={styles.recipeHeaderText}>
+                          {item.content}
+                        </h4>
+                      );
+                    } else if (item.type === 'list') {
+                      return (
+                        <div key={idx} className={styles.recipeListItem}>
+                          <span className={styles.listBullet}>•</span>
+                          <span>{item.content}</span>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <p key={idx} className={styles.recipeParagraph}>
+                          {item.content}
+                        </p>
+                      );
+                    }
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -850,6 +957,10 @@ export default function Fridge() {
             </div>
           )}
         </div>
+      )}
+
+      {genError && (
+        <div className={styles.genError}>{genError}</div>
       )}
     </div>
   );
