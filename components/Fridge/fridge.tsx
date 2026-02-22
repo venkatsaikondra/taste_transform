@@ -63,6 +63,12 @@ type CartItem = {
   qty: number;
 };
 
+type VideoResult = {
+  videoId: string;
+  title: string;
+  thumbnail: string;
+};
+
 // ─── Particle ────────────────────────────────────────────────────────────────
 
 function Particle({ emoji, startX, startY, endX, endY, onDone }: {
@@ -120,6 +126,7 @@ export default function Fridge() {
   const [recipeText, setRecipeText] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
+  const [videos, setVideos] = useState<VideoResult[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -209,6 +216,7 @@ export default function Fridge() {
   async function generateRecipe() {
     setGenError(null);
     setRecipeText(null);
+    setVideos([]);
     setSaveSuccess(false);
     const ingredients = cart.map(c => c.name);
     if (ingredients.length === 0) {
@@ -228,6 +236,19 @@ export default function Fridge() {
         setGenError(data?.error || 'Failed to generate recipe');
       } else {
         setRecipeText(data?.recipe ?? JSON.stringify(data));
+
+        // YouTube search — use first 2 ingredients + "recipe" as query
+        try {
+          const youtubeRes = await fetch(
+            `/api/youtube?query=${encodeURIComponent(ingredients.slice(0, 2).join(' ') + ' recipe')}`
+          );
+          if (youtubeRes.ok) {
+            const ytData = await youtubeRes.json();
+            setVideos(ytData.videos ?? []);
+          }
+        } catch {
+          // YouTube is optional — silently ignore errors
+        }
       }
     } catch (err: any) {
       setGenError(err?.message ?? String(err));
@@ -427,7 +448,15 @@ export default function Fridge() {
                 <span>{generating ? 'Generating…' : `Cook with ${vibeLabel} Mode`}</span>
                 <span>{vibe === 0 ? '🍽️' : vibe === 1 ? '🔬' : '🚀'}</span>
               </button>
-              <button className={styles.clearBtn} onClick={() => setCart([])}>
+              <button
+                className={styles.clearBtn}
+                onClick={() => {
+                  setCart([]);
+                  setRecipeText(null);
+                  setGenError(null);
+                  setVideos([]);
+                }}
+              >
                 Clear Pot
               </button>
             </div>
@@ -450,7 +479,7 @@ export default function Fridge() {
                 {saving ? '💾' : saveSuccess ? '✓' : '💾'}
               </button>
               <button onClick={() => { navigator.clipboard?.writeText(recipeText); }} className={styles.iconBtn} title="Copy">📋</button>
-              <button onClick={() => setRecipeText(null)} className={styles.iconBtn} title="Close">✕</button>
+              <button onClick={() => { setRecipeText(null); setVideos([]); setGenError(null); }} className={styles.iconBtn} title="Close">✕</button>
             </div>
           </div>
           <div className={styles.recipeBody}>
@@ -476,6 +505,28 @@ export default function Fridge() {
                 );
               }
             })}
+          </div>
+        </div>
+      )}
+
+      {/* YouTube video recommendations */}
+      {videos.length > 0 && (
+        <div className={styles.videoSection}>
+          <h3 className={styles.videoHeading}>VISUAL_GUIDES_FOUND</h3>
+          <div className={styles.videoGrid}>
+            {videos.map((vid) => (
+              <a
+                key={vid.videoId}
+                href={`https://youtube.com/watch?v=${vid.videoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.videoCard}
+              >
+                <img src={vid.thumbnail} alt={vid.title} />
+                <p>{vid.title}</p>
+                <span className={styles.watchBadge}>▶ WATCH_TUTORIAL</span>
+              </a>
+            ))}
           </div>
         </div>
       )}
