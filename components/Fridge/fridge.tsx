@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './fridge.module.css';
-
+import LoadingScreen from '../Loading/LoadingScreen';
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -369,6 +369,7 @@ function Particle({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Fridge() {
+
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -389,6 +390,15 @@ export default function Fridge() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
+
+
+  const [isAppLoading, setIsAppLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial data fetch from MongoDB Atlas
+    const timer = setTimeout(() => setIsAppLoading(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ── Filtered items based on search ──────────────────────────────────────────
   const filteredItems = React.useMemo(() => {
@@ -601,7 +611,9 @@ export default function Fridge() {
   const showGlobalSearch = !activeCategory && searchQuery.trim().length > 0;
 
   return (
-    <div className={styles.root}>
+    <>
+    <LoadingScreen isVisible={isAppLoading || generating} />
+     <div className={styles.root}>
       {/* Ambient background blobs */}
       <div className={styles.blob1} />
       <div className={styles.blob2} />
@@ -964,5 +976,7 @@ export default function Fridge() {
         <div className={styles.genError}>{genError}</div>
       )}
     </div>
+    </>
+   
   );
 }

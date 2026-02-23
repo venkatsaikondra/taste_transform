@@ -6,9 +6,10 @@ import { getUserFromToken } from "@/lib/auth";
 
 connect();
 
+// Updated Signature: context is now a Promise
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<Promise<{ id: string }>> } // Change here
 ) {
   try {
     const user = await getUserFromToken(request);
@@ -20,33 +21,26 @@ export async function DELETE(
       );
     }
 
-    const { id: recipeId } = await params;
+    // You MUST await params in Next.js 15
+    const resolvedParams = await params; 
+    const recipeId = resolvedParams.id;
 
-    // Find and verify the recipe belongs to this user
     const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
 
     if (!recipe) {
-      return NextResponse.json(
-        { error: "Recipe not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
     }
 
-    // Delete the recipe
     await Recipe.findByIdAndDelete(recipeId);
 
-    // Remove recipe reference from user
     await User.findByIdAndUpdate(user._id, {
       $pull: { recipes: recipeId },
     });
 
-    return NextResponse.json({
-      message: "Recipe deleted successfully",
-    });
+    return NextResponse.json({ message: "Recipe deleted successfully" });
   } catch (error: unknown) {
-    console.error("Error deleting recipe:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to delete recipe" },
+      { error: error instanceof Error ? error.message : "Failed to delete" },
       { status: 500 }
     );
   }
@@ -54,7 +48,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> } // Change here
 ) {
   try {
     const user = await getUserFromToken(request);
@@ -66,20 +60,18 @@ export async function PATCH(
       );
     }
 
-    const { id: recipeId } = await params;
+    // You MUST await params in Next.js 15
+    const resolvedParams = await params;
+    const recipeId = resolvedParams.id;
+    
     const body = await request.json();
 
-    // Find and verify the recipe belongs to this user
     const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
 
     if (!recipe) {
-      return NextResponse.json(
-        { error: "Recipe not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
     }
 
-    // Update the recipe
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       recipeId,
       { $set: body },
@@ -91,9 +83,8 @@ export async function PATCH(
       recipe: updatedRecipe,
     });
   } catch (error: unknown) {
-    console.error("Error updating recipe:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to update recipe" },
+      { error: error instanceof Error ? error.message : "Failed to update" },
       { status: 500 }
     );
   }
