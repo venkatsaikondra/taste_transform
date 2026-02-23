@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import styles from './dashboard.module.css';
 import { Trash2, Heart, Calendar, ChefHat, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Script from 'next/script';
 
 type Recipe = {
   _id: string;
@@ -12,6 +14,7 @@ type Recipe = {
   vibe: string;
   totalCalories: number;
   recipeText: string;
+  videos?: { videoId: string; title: string; thumbnail: string }[];
   isFavorite: boolean;
   createdAt: string;
 };
@@ -198,6 +201,11 @@ const Dashboard = () => {
 
   return (
     <div className={styles.root}>
+      <Script
+        src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js"
+        type="module"
+        strategy="lazyOnload"
+      />
       {/* Ambient background blobs */}
       <div className={styles.blob1}></div>
       <div className={styles.blob2}></div>
@@ -305,7 +313,7 @@ const Dashboard = () => {
             </div>
 
             {/* Recipe Detail Panel */}
-            {selectedRecipe && (
+            {selectedRecipe ? (
               <div className={styles.detailPanel}>
                 <div className={styles.detailHeader}>
                   <h2 className={styles.detailTitle}>
@@ -374,12 +382,50 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                {selectedRecipe.videos && selectedRecipe.videos.length > 0 && (
+                  <div className={styles.detailSection}>
+                    <h3 className={styles.sectionTitle}>Video Tutorials</h3>
+                    <div className={styles.videoGrid}>
+                      {selectedRecipe.videos.map((video) => (
+                        <a
+                          key={video.videoId}
+                          href={`https://youtube.com/watch?v=${video.videoId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.videoCard}
+                        >
+                          <Image src={video.thumbnail} alt={video.title} className={styles.videoThumbnail} width={480} height={270} />
+                          <p className={styles.videoTitle}>{video.title}</p>
+                          <span className={styles.watchBadge}>▶ Watch Tutorial</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => deleteRecipe(selectedRecipe._id)}
                   className={styles.deleteFullBtn}
                 >
                   <Trash2 size={18} /> Delete Recipe
                 </button>
+              </div>
+            ) : (
+              <div className={styles.placeholderPanel}>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `
+                      <dotlottie-wc
+                        src="https://lottie.host/b343d42e-ad44-46e9-a6f5-819449ce04cd/JbpoJxEK68.lottie"
+                        style="width: 300px; height: 300px"
+                        autoplay
+                        loop
+                      ></dotlottie-wc>
+                    `
+                  }}
+                />
+                <h3 className={styles.placeholderTitle}>Select a Recipe</h3>
+                <p className={styles.placeholderText}>Click on a recipe card to view the details</p>
               </div>
             )}
           </div>

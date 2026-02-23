@@ -577,6 +577,7 @@ export default function Fridge() {
           vibe: vibeLabel,
           totalCalories: totalCal,
           recipeText,
+          videos: videos,
         }),
       });
 

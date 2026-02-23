@@ -107,6 +107,7 @@ import Lottie from 'lottie-react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import { User } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -141,6 +142,9 @@ const Menu = () => {
             <div className={Styles.menu_controls}>
                 <Link href="/dashboard" className={Styles.nav_link}>DASHBOARD</Link>
                 <Link href="/fridge" className={Styles.cta_button}>OPEN FRIDGE</Link>
+                <Link href="/profile" className={Styles.profile_icon}>
+                    <User size={20} />
+                </Link>
             </div>
         </nav>
     )
