@@ -8,7 +8,7 @@ connect();
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromToken(request);
@@ -20,7 +20,7 @@ export async function DELETE(
       );
     }
 
-    const recipeId = params.id;
+    const { id: recipeId } = await params;
 
     // Find and verify the recipe belongs to this user
     const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
@@ -54,7 +54,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getUserFromToken(request);
@@ -66,7 +66,7 @@ export async function PATCH(
       );
     }
 
-    const recipeId = params.id;
+    const { id: recipeId } = await params;
     const body = await request.json();
 
     // Find and verify the recipe belongs to this user
