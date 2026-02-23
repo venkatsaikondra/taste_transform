@@ -6,10 +6,10 @@ import { getUserFromToken } from "@/lib/auth";
 
 connect();
 
-// Updated Signature: context is now a Promise
+// 1. Corrected DELETE Handler
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<Promise<{ id: string }>> } // Change here
+  { params }: { params: Promise<{ id: string }> } // Remove the extra Promise<> here
 ) {
   try {
     const user = await getUserFromToken(request);
@@ -21,9 +21,8 @@ export async function DELETE(
       );
     }
 
-    // You MUST await params in Next.js 15
-    const resolvedParams = await params; 
-    const recipeId = resolvedParams.id;
+    // Await the single promise
+    const { id: recipeId } = await params; 
 
     const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
 
@@ -46,9 +45,10 @@ export async function DELETE(
   }
 }
 
+// 2. Corrected PATCH Handler
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // Change here
+  { params }: { params: Promise<{ id: string }> } // This one was already correct
 ) {
   try {
     const user = await getUserFromToken(request);
@@ -60,10 +60,7 @@ export async function PATCH(
       );
     }
 
-    // You MUST await params in Next.js 15
-    const resolvedParams = await params;
-    const recipeId = resolvedParams.id;
-    
+    const { id: recipeId } = await params;
     const body = await request.json();
 
     const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
