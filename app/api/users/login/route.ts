@@ -79,7 +79,8 @@ export async function POST(request: NextRequest) {
     response.cookies.set('token', token, {
       httpOnly: true,
       // Fixed for mobile: only strict secure in true production
-      secure: process.env.NODE_ENV === 'production' && !request.url.includes('localhost'),
+      //secure: process.env.NODE_ENV === 'production' && !request.url.includes('localhost'),
+      secure: true,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24,
