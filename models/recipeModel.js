@@ -37,6 +37,13 @@ const recipeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    videos: [
+      {
+        videoId: String,
+        title: String,
+        thumbnail: String,
+      },
+    ],
     isFavorite: {
       type: Boolean,
       default: false,

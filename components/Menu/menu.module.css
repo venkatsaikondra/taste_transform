@@ -261,6 +261,31 @@
   color: #fff;
   text-decoration: none;
   letter-spacing: 1px;
+  transition: color 0.2s ease;
+}
+
+.nav_link:hover {
+  color: #c5fb45;
+}
+
+.profile_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.profile_icon:hover {
+  background: rgba(197, 251, 69, 0.1);
+  border-color: rgba(197, 251, 69, 0.3);
+  color: #c5fb45;
+  transform: scale(1.05);
 }
 
 .cta_button {
