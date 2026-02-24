@@ -50,6 +50,7 @@ import { signToken } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     await connect();
+    
     const { email, password } = await request.json();
     
     // Normalize email to lowercase to match signup logic
@@ -78,10 +79,10 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set('token', token, {
       httpOnly: true,
-      // Fixed for mobile: only strict secure in true production
-      //secure: process.env.NODE_ENV === 'production' && !request.url.includes('localhost'),
       secure: true,
-      sameSite: 'lax',
+      // Use SameSite=None for cross-site contexts (Vercel HTTPS).
+      // This is required when frontend and api may be accessed cross-site.
+      sameSite: 'none',
       path: '/',
       maxAge: 60 * 60 * 24,
     });

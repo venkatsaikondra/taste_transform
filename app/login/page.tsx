@@ -14,12 +14,20 @@ export default function LoginPage() {
   e.preventDefault();
   try {
     setLoading(true);
-    // Send request
-    const response = await axios.post("/api/users/login", user);
+    // Send request (include credentials so browser accepts Set-Cookie)
+    const response = await axios.post("/api/users/login", user, { withCredentials: true });
     
     // Success feedback
     toast.success(`Welcome back, ${response.data.user.username}!`);
     
+    // Force App Router to revalidate server components (refresh auth state)
+    try {
+      router.refresh();
+    } catch (e) {
+      // fallback for older Next versions
+      // no-op
+    }
+
     const params = new URLSearchParams(window.location.search);
     router.push(params.get('from') || '/');
   } catch (error: any) {
