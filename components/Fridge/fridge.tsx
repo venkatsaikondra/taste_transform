@@ -380,6 +380,7 @@ export default function Fridge() {
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
   const cartRef = useRef<HTMLDivElement>(null);
   const particleIdRef = useRef(0);
+  const generationRef = useRef<HTMLDivElement>(null);
 
   // Recipe generation state
   const [recipeText, setRecipeText] = useState<string | null>(null);
@@ -536,6 +537,14 @@ export default function Fridge() {
       }
 
       setRecipeText(data.recipe ?? JSON.stringify(data));
+
+      // Scroll to recipe section
+      setTimeout(() => {
+        generationRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 200);
 
       // YouTube search — use first 2 ingredients + "recipe" as query
       try {
@@ -888,7 +897,7 @@ export default function Fridge() {
 
       {/* ── LLM + YouTube Generation Section ── */}
       {(recipeText || generating) && (
-        <div className={styles.generationWrapper}>
+        <div ref={generationRef} className={styles.generationWrapper}>
           <div className={styles.recipeCard}>
             <div className={styles.recipeHeader}>
               <h2 className={styles.glowText}>GENERATED_RECIPE.exe</h2>
