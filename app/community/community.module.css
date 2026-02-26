@@ -1,0 +1,78 @@
+.root {
+  min-height: 100vh;
+  background: #0a0a0f;
+  padding: 2rem;
+  color: white;
+  font-family: 'Courier New', monospace;
+}
+
+.title {
+  color: #c5fb45;
+  letter-spacing: 0.3rem;
+  text-shadow: 0 0 15px rgba(197, 251, 69, 0.3);
+}
+
+.feedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.recipeCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.recipeCard:hover {
+  border-color: #c5fb45;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.vibeBadge {
+  background: #c5fb45;
+  color: black;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.recipeName {
+  margin: 1rem 0;
+  font-size: 1.2rem;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+.actionBtn {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.actionBtn:hover {
+  color: #c5fb45;
+}
+
+.viewBtn {
+  background: #c5fb45;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
