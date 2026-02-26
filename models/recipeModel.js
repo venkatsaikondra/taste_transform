@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const recipeSchema = new mongoose.Schema(
   {
-    userId: {
+    // reference to the user who created/generated the recipe
+    authorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -47,6 +48,29 @@ const recipeSchema = new mongoose.Schema(
     isFavorite: {
       type: Boolean,
       default: false,
+    },
+    // visibility flag, only public recipes appear in the community feed
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
+    // users who liked the recipe
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    // convenience counter, kept in sync in application logic
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    // if this recipe was forked/cloned from another one
+    parentRecipeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Recipe",
+      default: null,
     },
   },
   { timestamps: true }

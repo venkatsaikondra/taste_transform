@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch all recipes for this user, sorted by newest first
-    const recipes = await Recipe.find({ userId: user._id })
+    const recipes = await Recipe.find({ authorId: user._id })
       .sort({ createdAt: -1 });
 
     return NextResponse.json({

@@ -24,7 +24,7 @@ export async function DELETE(
     // Await the single promise
     const { id: recipeId } = await params; 
 
-    const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
+    const recipe = await Recipe.findOne({ _id: recipeId, authorId: user._id });
 
     if (!recipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
@@ -63,7 +63,7 @@ export async function PATCH(
     const { id: recipeId } = await params;
     const body = await request.json();
 
-    const recipe = await Recipe.findOne({ _id: recipeId, userId: user._id });
+    const recipe = await Recipe.findOne({ _id: recipeId, authorId: user._id });
 
     if (!recipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
