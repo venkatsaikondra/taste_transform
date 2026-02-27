@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 const recipeSchema = new mongoose.Schema(
   {
     // reference to the user who created/generated the recipe
+    // store as string (allows mock IDs during development)
     authorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
       index: true,
     },
@@ -27,7 +27,6 @@ const recipeSchema = new mongoose.Schema(
     },
     vibe: {
       type: String,
-      enum: ["Safe", "Experimental", "Chaos"],
       default: "Safe",
     },
     totalCalories: {
@@ -54,11 +53,10 @@ const recipeSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // users who liked the recipe
+    // users who liked the recipe (stored as strings to support mock IDs)
     likes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        type: String,
       },
     ],
     // convenience counter, kept in sync in application logic
@@ -68,8 +66,7 @@ const recipeSchema = new mongoose.Schema(
     },
     // if this recipe was forked/cloned from another one
     parentRecipeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Recipe",
+      type: String,
       default: null,
     },
   },

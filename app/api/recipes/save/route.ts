@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Create new recipe
     const newRecipe = new Recipe({
-      authorId: user._id,
+      authorId: String(user._id),
       recipeName,
       ingredients: ingredients || [],
       steps: steps || recipeText,
