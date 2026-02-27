@@ -30,6 +30,10 @@ interface Recipe {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const VIBES = ['all', 'cozy', 'spicy', 'fresh', 'hearty', 'quick', 'fancy', 'vegan', 'keto'];
+const VIBE_EMOJIS: Record<string, string> = {
+  all: '✦', cozy: '🍵', spicy: '🌶️', fresh: '🌿', hearty: '🥩',
+  quick: '⚡', fancy: '✨', vegan: '🌱', keto: '🥑'
+};
 const SORTS = [
   { value: 'newest',        label: '🕐 NEW'     },
   { value: 'popular',       label: '🔥 HOT'     },
@@ -37,6 +41,7 @@ const SORTS = [
   { value: 'calories_high', label: '🍔 HEAVY'   },
 ];
 
+const REACTIONS = ['❤️', '🔥', '😍', '👏', '🤤', '⭐'];
 const MOCK_USER_ID = 'user_demo_123';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -48,11 +53,166 @@ function timeAgo(date: string) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+// ─── Floating Heart ───────────────────────────────────────────────────────────
+function FloatingHeart({ id, x, y, emoji, onDone }: { id: number; x: number; y: number; emoji: string; onDone: (id: number) => void }) {
+  useEffect(() => {
+    const t = setTimeout(() => onDone(id), 900);
+    return () => clearTimeout(t);
+  }, [id, onDone]);
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: x,
+        top: y,
+        pointerEvents: 'none',
+        zIndex: 9999,
+        fontSize: '1.5rem',
+        animation: 'floatUp 0.9s ease-out forwards',
+        userSelect: 'none',
+      }}
+    >
+      {emoji}
+    </div>
+  );
+}
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ message, visible }: { message: string; visible: boolean }) {
   return (
     <div className={`${styles.toast} ${visible ? styles.toastVisible : ''}`}>
       {message}
+    </div>
+  );
+}
+
+// ─── Live Activity Ticker ─────────────────────────────────────────────────────
+const ACTIVITY_FEED = [
+  '🍳 @chef_marco just posted Truffle Pasta',
+  '❤️ @yumi liked Miso Glazed Salmon',
+  '🍴 @dev_cook forked Spicy Ramen',
+  '💬 @foodlover commented on Avocado Toast',
+  '🔥 @hungry_hacker posted Late Night Tacos',
+  '⭐ @zen_kitchen liked Tofu Stir Fry',
+];
+
+function ActivityTicker() {
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx(i => (i + 1) % ACTIVITY_FEED.length);
+        setVisible(true);
+      }, 400);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className={styles.activityTicker}>
+      <span className={styles.tickerDot} />
+      <span className={`${styles.tickerText} ${visible ? styles.tickerVisible : styles.tickerHidden}`}>
+        {ACTIVITY_FEED[idx]}
+      </span>
+    </div>
+  );
+}
+
+// ─── Like Button ──────────────────────────────────────────────────────────────
+function LikeButton({ recipeId, count, liked, onLike }: {
+  recipeId: string;
+  count: number;
+  liked: boolean;
+  onLike: (id: string, e: React.MouseEvent) => void;
+}) {
+  const [animating, setAnimating] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 600);
+    onLike(recipeId, e);
+  };
+
+  return (
+    <button
+      className={`${styles.likeBtn} ${liked ? styles.likeBtnActive : ''} ${animating ? styles.likeBtnPop : ''}`}
+      onClick={handleClick}
+      title={liked ? 'unlike' : 'like'}
+    >
+      <span className={styles.likeHeart}>{liked ? '❤️' : '🤍'}</span>
+      <span className={styles.likeCount}>{count}</span>
+    </button>
+  );
+}
+
+// ─── Reaction Bar ─────────────────────────────────────────────────────────────
+function ReactionBar({ recipeId }: { recipeId: string }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [counts, setCounts] = useState<Record<string, number>>({
+    '❤️': 0, '🔥': 0, '😍': 0, '👏': 0, '🤤': 0, '⭐': 0
+  });
+  const [open, setOpen] = useState(false);
+
+  const pick = (emoji: string) => {
+    if (selected === emoji) {
+      setCounts(c => ({ ...c, [emoji]: Math.max(0, c[emoji] - 1) }));
+      setSelected(null);
+    } else {
+      if (selected) setCounts(c => ({ ...c, [selected]: Math.max(0, c[selected] - 1) }));
+      setCounts(c => ({ ...c, [emoji]: c[emoji] + 1 }));
+      setSelected(emoji);
+    }
+    setOpen(false);
+  };
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const topReactions = Object.entries(counts).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  return (
+    <div className={styles.reactionWrap}>
+      <button className={styles.reactionToggle} onClick={() => setOpen(o => !o)}>
+        {selected || '😶'} {total > 0 ? total : 'react'}
+      </button>
+      {topReactions.length > 0 && (
+        <span className={styles.topReactions}>
+          {topReactions.map(([emoji]) => emoji).join('')}
+        </span>
+      )}
+      {open && (
+        <div className={styles.reactionPicker}>
+          {REACTIONS.map(r => (
+            <button
+              key={r}
+              className={`${styles.reactionPickerBtn} ${selected === r ? styles.reactionPickerActive : ''}`}
+              onClick={() => pick(r)}
+              title={r}
+            >
+              {r}
+              {counts[r] > 0 && <span className={styles.reactionPickerCount}>{counts[r]}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Calorie Meter ────────────────────────────────────────────────────────────
+function CalorieMeter({ calories }: { calories: number }) {
+  const max = 1500;
+  const pct = Math.min(100, (calories / max) * 100);
+  const color = pct < 33 ? '#4ade80' : pct < 66 ? '#facc15' : '#f87171';
+
+  return (
+    <div className={styles.calMeter}>
+      <div className={styles.calMeterBar}>
+        <div className={styles.calMeterFill} style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <span className={styles.calMeterLabel} style={{ color }}>{calories} kcal</span>
     </div>
   );
 }
@@ -89,7 +249,6 @@ function CommentSection({ recipeId, comments, onAddComment }: {
           {submitting ? '...' : '↵'}
         </button>
       </div>
-
       {comments.length > 0 && (
         <div className={styles.commentList}>
           {comments.map(c => (
@@ -136,43 +295,39 @@ function ForkModal({ recipe, onConfirm, onClose, loading }: {
 function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
   recipe: Recipe;
   likedIds: Set<string>;
-  onLike: (id: string) => void;
+  onLike: (id: string, e: React.MouseEvent) => void;
   onFork: (r: Recipe) => void;
   onComment: (recipeId: string, text: string) => Promise<void>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
   const liked = likedIds.has(recipe._id);
   const comments = recipe.comments || [];
 
   return (
     <article className={styles.postCard}>
-      {/* Sidebar vote column */}
-      <div className={styles.voteCol}>
-        <button
-          className={`${styles.voteBtn} ${liked ? styles.voteBtnActive : ''}`}
-          onClick={() => onLike(recipe._id)}
-          title={liked ? 'unlike' : 'like'}
-        >
-          ▲
-        </button>
-        <span className={`${styles.voteCount} ${liked ? styles.voteCountActive : ''}`}>
-          {recipe.likesCount}
-        </span>
-        <button className={styles.voteBtn} style={{ opacity: 0.3 }}>▼</button>
-      </div>
-
       {/* Main content */}
       <div className={styles.postBody}>
         {/* Post header */}
         <div className={styles.postMeta}>
-          <span className={styles.vibePill}>{recipe.vibe}</span>
+          <span className={styles.vibePill}>
+            {VIBE_EMOJIS[recipe.vibe] || '✦'} {recipe.vibe}
+          </span>
           {recipe.parentRecipeId && <span className={styles.forkedPill}>🍴 forked</span>}
           <span className={styles.postAuthor}>
-            posted by <strong>@{recipe.authorId || 'anonymous'}</strong>
+            <span className={styles.avatarDot} />
+            <strong>@{recipe.authorId || 'anonymous'}</strong>
           </span>
           <span className={styles.postTime}>{timeAgo(recipe.createdAt)}</span>
-          <span className={styles.calPill}>{recipe.totalCalories} kcal</span>
+          <CalorieMeter calories={recipe.totalCalories} />
+          <button
+            className={`${styles.bookmarkBtn} ${bookmarked ? styles.bookmarkActive : ''}`}
+            onClick={() => setBookmarked(b => !b)}
+            title={bookmarked ? 'saved' : 'save'}
+          >
+            {bookmarked ? '🔖' : '📄'}
+          </button>
         </div>
 
         {/* Title */}
@@ -209,19 +364,31 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
 
         {/* Action bar */}
         <div className={styles.actionBar}>
+          {/* ★ NEW LIKE BUTTON */}
+          <LikeButton
+            recipeId={recipe._id}
+            count={recipe.likesCount}
+            liked={liked}
+            onLike={onLike}
+          />
+
           <button
             className={styles.actionBarBtn}
             onClick={() => setShowComments(s => !s)}
           >
-            💬 {comments.length + (recipe.commentCount || 0)} comments
+            💬 <span>{comments.length + (recipe.commentCount || 0)}</span>
           </button>
+
+          {/* ★ REACTION BAR */}
+          <ReactionBar recipeId={recipe._id} />
+
           <button className={styles.actionBarBtn} onClick={() => onFork(recipe)}>
             🍴 fork
           </button>
           <button className={styles.actionBarBtn} onClick={() => {
             navigator.clipboard?.writeText(window.location.href + '#' + recipe._id);
           }}>
-            🔗 share
+            🔗
           </button>
         </div>
 
@@ -247,6 +414,7 @@ function NewPostModal({ onClose, onSubmit, loading }: {
   const [recipeName, setRecipeName] = useState('');
   const [vibe, setVibe] = useState('cozy');
   const [instructions, setInstructions] = useState('');
+  const [step, setStep] = useState(1);
 
   const handleSubmit = async () => {
     if (!recipeName.trim()) return;
@@ -260,48 +428,88 @@ function NewPostModal({ onClose, onSubmit, loading }: {
           <h2 className={styles.newPostTitle}>📝 POST YOUR DISH</h2>
           <button className={styles.modalCloseX} onClick={onClose}>✕</button>
         </div>
-        <p className={styles.newPostSubtitle}>Share what you cooked with the community</p>
 
-        <label className={styles.fieldLabel}>RECIPE NAME</label>
-        <input
-          className={styles.fieldInput}
-          placeholder="e.g. Midnight Ramen with Soft Egg"
-          value={recipeName}
-          onChange={e => setRecipeName(e.target.value)}
-        />
-
-        <label className={styles.fieldLabel}>VIBE</label>
-        <div className={styles.vibeSelect}>
-          {VIBES.filter(v => v !== 'all').map(v => (
-            <button
-              key={v}
-              className={`${styles.vibeSelectBtn} ${vibe === v ? styles.vibeSelectActive : ''}`}
-              onClick={() => setVibe(v)}
-            >
-              {v}
+        {/* Step indicator */}
+        <div className={styles.stepIndicator}>
+          {[1, 2].map(s => (
+            <button key={s} className={`${styles.stepDot} ${step === s ? styles.stepDotActive : step > s ? styles.stepDotDone : ''}`} onClick={() => setStep(s)}>
+              {step > s ? '✓' : s}
             </button>
           ))}
+          <div className={styles.stepLine} />
         </div>
 
-        <label className={styles.fieldLabel}>INSTRUCTIONS / NOTES</label>
-        <textarea
-          className={styles.fieldTextarea}
-          placeholder="Tell the community how you made it..."
-          value={instructions}
-          onChange={e => setInstructions(e.target.value)}
-          rows={5}
-        />
+        {step === 1 && (
+          <>
+            <label className={styles.fieldLabel}>RECIPE NAME</label>
+            <input
+              className={styles.fieldInput}
+              placeholder="e.g. Midnight Ramen with Soft Egg"
+              value={recipeName}
+              onChange={e => setRecipeName(e.target.value)}
+              autoFocus
+            />
+            <label className={styles.fieldLabel}>VIBE</label>
+            <div className={styles.vibeSelect}>
+              {VIBES.filter(v => v !== 'all').map(v => (
+                <button
+                  key={v}
+                  className={`${styles.vibeSelectBtn} ${vibe === v ? styles.vibeSelectActive : ''}`}
+                  onClick={() => setVibe(v)}
+                >
+                  {VIBE_EMOJIS[v]} {v}
+                </button>
+              ))}
+            </div>
+            <div className={styles.newPostActions}>
+              <button className={styles.cancelBtn} onClick={onClose}>CANCEL</button>
+              <button className={styles.confirmBtn} onClick={() => setStep(2)} disabled={!recipeName.trim()}>
+                NEXT →
+              </button>
+            </div>
+          </>
+        )}
 
-        <div className={styles.newPostActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>CANCEL</button>
-          <button
-            className={styles.confirmBtn}
-            onClick={handleSubmit}
-            disabled={loading || !recipeName.trim()}
-          >
-            {loading ? 'POSTING...' : 'POST TO COMMUNITY →'}
+        {step === 2 && (
+          <>
+            <label className={styles.fieldLabel}>INSTRUCTIONS / NOTES</label>
+            <textarea
+              className={styles.fieldTextarea}
+              placeholder="Tell the community how you made it..."
+              value={instructions}
+              onChange={e => setInstructions(e.target.value)}
+              rows={6}
+              autoFocus
+            />
+            <div className={styles.newPostActions}>
+              <button className={styles.cancelBtn} onClick={() => setStep(1)}>← BACK</button>
+              <button
+                className={styles.confirmBtn}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? 'POSTING...' : 'POST TO COMMUNITY →'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Trending Tags ────────────────────────────────────────────────────────────
+function TrendingTags({ onSelect }: { onSelect: (tag: string) => void }) {
+  const tags = ['#pasta', '#onepot', '#under30min', '#nooven', '#highprotein', '#mealprep', '#comfort'];
+  return (
+    <div className={styles.sideCard}>
+      <h3 className={styles.sideCardTitle}>TRENDING TAGS</h3>
+      <div className={styles.trendingTags}>
+        {tags.map(tag => (
+          <button key={tag} className={styles.trendingTag} onClick={() => onSelect(tag)}>
+            {tag}
           </button>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -328,6 +536,14 @@ export default function CommunityKitchen() {
   const [toast, setToast]             = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const toastTimer                    = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Floating hearts
+  const [hearts, setHearts] = useState<{ id: number; x: number; y: number; emoji: string }[]>([]);
+  const heartId = useRef(0);
+
+  const removeHeart = useCallback((id: number) => {
+    setHearts(prev => prev.filter(h => h.id !== id));
+  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -366,8 +582,13 @@ export default function CommunityKitchen() {
     searchTimer.current = setTimeout(() => setSearch(val), 400);
   };
 
-  // ── Like ──────────────────────────────────────────────────────────────────
-  const handleLike = async (recipeId: string) => {
+  // ── Like (with floating heart) ────────────────────────────────────────────
+  const handleLike = async (recipeId: string, e: React.MouseEvent) => {
+    // Spawn floating heart
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const emoji = likedIds.has(recipeId) ? '💔' : '❤️';
+    setHearts(prev => [...prev, { id: ++heartId.current, x: rect.left + rect.width / 2, y: rect.top, emoji }]);
+
     try {
       const res  = await fetch('/api/community', {
         method: 'POST',
@@ -383,7 +604,6 @@ export default function CommunityKitchen() {
       setRecipes(prev =>
         prev.map(r => r._id === recipeId ? { ...r, likesCount: data.likesCount } : r)
       );
-      showToast(data.liked ? '❤️ liked!' : '🤍 unliked');
     } catch {
       showToast('❌ failed to like');
     }
@@ -463,6 +683,11 @@ export default function CommunityKitchen() {
     <div className={styles.root}>
       <Toast message={toast} visible={toastVisible} />
 
+      {/* Floating hearts */}
+      {hearts.map(h => (
+        <FloatingHeart key={h.id} {...h} onDone={removeHeart} />
+      ))}
+
       {/* ── Banner ── */}
       <div className={styles.banner}>
         <div className={styles.bannerContent}>
@@ -475,18 +700,22 @@ export default function CommunityKitchen() {
               </p>
             </div>
           </div>
-          <button className={styles.newPostBtn} onClick={() => setShowNewPost(true)}>
-            + POST DISH
-          </button>
+          <div className={styles.bannerRight}>
+            <ActivityTicker />
+            <button className={styles.newPostBtn} onClick={() => setShowNewPost(true)}>
+              + POST DISH
+            </button>
+          </div>
         </div>
 
-        {/* Inline stats bar */}
         <div className={styles.statsBar}>
           <span className={styles.statItem}>🔥 {total} recipes</span>
           <span className={styles.statDivider}>·</span>
           <span className={styles.statItem}>🍴 fork any recipe</span>
           <span className={styles.statDivider}>·</span>
           <span className={styles.statItem}>💬 comment & discuss</span>
+          <span className={styles.statDivider}>·</span>
+          <span className={styles.statItem}>❤️ like what you love</span>
         </div>
       </div>
 
@@ -513,11 +742,14 @@ export default function CommunityKitchen() {
                   className={`${styles.sideVibeBtn} ${activeVibe === v ? styles.sideVibeBtnActive : ''}`}
                   onClick={() => setActiveVibe(v)}
                 >
-                  {v === 'all' ? '# all' : `# ${v}`}
+                  <span>{VIBE_EMOJIS[v] || '#'}</span>
+                  {v === 'all' ? 'all' : v}
                 </button>
               ))}
             </div>
           </div>
+
+          <TrendingTags onSelect={tag => setSearch(tag.replace('#', ''))} />
 
           <div className={styles.sideCard}>
             <h3 className={styles.sideCardTitle}>RULES</h3>
@@ -550,7 +782,7 @@ export default function CommunityKitchen() {
               <input
                 type="text"
                 className={styles.searchInputInline}
-                placeholder="search recipes..."
+                placeholder="search recipes, tags..."
                 onChange={handleSearchChange}
               />
             </div>
@@ -569,7 +801,6 @@ export default function CommunityKitchen() {
             <div className={styles.skeletonList}>
               {[...Array(4)].map((_, i) => (
                 <div key={i} className={styles.skeletonCard}>
-                  <div className={styles.skeletonVote} />
                   <div className={styles.skeletonBody}>
                     <div className={styles.skeletonLine} style={{ width: '30%' }} />
                     <div className={styles.skeletonLine} style={{ width: '70%', height: '1.1rem' }} />
@@ -594,7 +825,7 @@ export default function CommunityKitchen() {
 
           {/* Posts */}
           <div className={styles.postList}>
-            {recipes.map((recipe, i) => (
+            {recipes.map((recipe) => (
               <PostCard
                 key={recipe._id}
                 recipe={recipe}
