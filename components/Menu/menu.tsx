@@ -141,6 +141,7 @@ const Menu = () => {
 
             <div className={Styles.menu_controls}>
                 <Link href="/dashboard" className={Styles.nav_link}>DASHBOARD</Link>
+                <Link href="/community" className={Styles.nav_link}>COMMUNITY</Link>
                 <Link href="/fridge" className={Styles.cta_button}>OPEN FRIDGE</Link>
                 <Link href="/profile" className={Styles.profile_icon}>
                     <User size={20} />

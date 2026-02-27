@@ -2,9 +2,10 @@ import mongoose from "mongoose";
 
 const recipeSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    // reference to the user who created/generated the recipe
+    // store as string (allows mock IDs during development)
+    authorId: {
+      type: String,
       required: true,
       index: true,
     },
@@ -26,7 +27,6 @@ const recipeSchema = new mongoose.Schema(
     },
     vibe: {
       type: String,
-      enum: ["Safe", "Experimental", "Chaos"],
       default: "Safe",
     },
     totalCalories: {
@@ -47,6 +47,27 @@ const recipeSchema = new mongoose.Schema(
     isFavorite: {
       type: Boolean,
       default: false,
+    },
+    // visibility flag, only public recipes appear in the community feed
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
+    // users who liked the recipe (stored as strings to support mock IDs)
+    likes: [
+      {
+        type: String,
+      },
+    ],
+    // convenience counter, kept in sync in application logic
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    // if this recipe was forked/cloned from another one
+    parentRecipeId: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }
