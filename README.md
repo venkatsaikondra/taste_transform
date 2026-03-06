@@ -39,49 +39,49 @@ fridge scan  →  ingredient pot  →  AI generation  →  community feed
 ### 🏠 Landing Page
 > *"Let the LLM hallucinate your next five-star meal."*
 
-![Landing Page](ss1.png)
+![Landing Page](public/Readme/ss1.png)
 
 ---
 
 ### 💡 The Mission
 > Ending kitchen confusion with LLMs — zero waste vision, instant recipe planning.
 
-![Mission Section](ss2.png)
+![Mission Section](public/Readme/ss2.png)
 
 ---
 
 ### 🧊 Open Fridge — Ingredient Picker
 > Browse by category or search. Click to toss ingredients into your Cooking Pot.
 
-![Ingredient Picker](ss3.png)
+![Ingredient Picker](public/Readme/ss3.png)
 
 ---
 
 ### 🍲 Cooking Pot — Ingredient Selection
 > 28 veggies, proteins, pantry staples and more. Calorie tracking built in.
 
-![Ingredient Selection](ss4.png)
+![Ingredient Selection](public/Readme/ss4.png)
 
 ---
 
 ### 🤖 AI-Generated Recipe Output
 > `GENERATED_RECIPE.exe` — full ingredient list, numbered steps, and YouTube visual guides on the side.
 
-![Generated Recipe](ss5.png)
+![Generated Recipe](public/Readme/ss5.png)
 
 ---
 
 ### 📊 Recipe Dashboard
 > Your personal culinary history. All saved recipes with calorie counts, ingredients, and dates.
 
-![Recipe Dashboard](ss6.png)
+![Recipe Dashboard](public/Readme/ss6.png)
 
 ---
 
 ### 🌍 r/community_kitchen
 > Reddit-style community feed. Post dishes, fork recipes, react, comment, and discover what others are cooking.
 
-![Community Feed](ss7.png)
+![Community Feed](public/Readme/ss7.png)
 
 ---
 
@@ -265,11 +265,6 @@ Please follow the existing code style — TypeScript throughout, monospace dark 
 
 ---
 
-## 📄 License
-
-MIT © 2026 — cook freely, fork openly.
-
----
 
 <div align="center">
 
