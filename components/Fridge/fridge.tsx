@@ -653,7 +653,7 @@ export default function Fridge() {
           <div className={styles.fridgeHeader}>
             <span className={styles.fridgeIcon}>❄️</span>
             <div>
-              <h1 className={styles.fridgeTitle}>Digital Pantry</h1>
+              <h1 className={styles.fridgeTitle}>Ingredient Box</h1>
               <p className={styles.fridgeSub}>Pick your ingredients</p>
             </div>
           </div>
