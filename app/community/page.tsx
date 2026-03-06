@@ -31,14 +31,21 @@ interface Recipe {
 // ─── Constants ────────────────────────────────────────────────────────────────
 const VIBES = ['all', 'cozy', 'spicy', 'fresh', 'hearty', 'quick', 'fancy', 'vegan', 'keto'];
 const VIBE_EMOJIS: Record<string, string> = {
-  all: '✦', cozy: '🍵', spicy: '🌶️', fresh: '🌿', hearty: '🥩',
-  quick: '⚡', fancy: '✨', vegan: '🌱', keto: '🥑'
+  all:    '✦ All Recipes',
+  cozy:   '🍵 Comfort Food',
+  spicy:  '🌶️ Spicy Food',
+  fresh:  '🌿 Fresh & Light',
+  hearty: '🥩 Filling Meals',
+  quick:  '⚡ Quick Meals',
+  fancy:  '✨ Special Dishes',
+  vegan:  '🌱 Vegan Food',
+  keto:   '🥑 Keto Diet',
 };
 const SORTS = [
-  { value: 'newest',        label: '🕐 NEW'     },
-  { value: 'popular',       label: '🔥 HOT'     },
-  { value: 'calories_low',  label: '🥗 LIGHT'   },
-  { value: 'calories_high', label: '🍔 HEAVY'   },
+  { value: 'newest',        label: '🕐 NEW'   },
+  { value: 'popular',       label: '🔥 HOT'   },
+  { value: 'calories_low',  label: '🥗 LIGHT' },
+  { value: 'calories_high', label: '🍔 HEAVY' },
 ];
 
 const REACTIONS = ['❤️', '🔥', '😍', '👏', '🤤', '⭐'];
@@ -51,6 +58,25 @@ function timeAgo(date: string) {
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   return `${Math.floor(seconds / 86400)}d ago`;
+}
+
+function parseInstructions(instructions: string): { isSteps: boolean; content?: string; steps?: string[] } {
+  const lines = instructions.split('\n').map(line => line.trim()).filter(line => line);
+  const steps: string[] = [];
+  let hasNumberedSteps = false;
+
+  for (const line of lines) {
+    if (/^\d+[\.\)]\s/.test(line)) {
+      hasNumberedSteps = true;
+      steps.push(line.replace(/^\d+[\.\)]\s/, '').trim());
+    } else if (hasNumberedSteps) {
+      steps.push(line);
+    } else {
+      return { isSteps: false, content: instructions };
+    }
+  }
+
+  return { isSteps: hasNumberedSteps, steps };
 }
 
 // ─── Floating Heart ───────────────────────────────────────────────────────────
@@ -292,12 +318,13 @@ function ForkModal({ recipe, onConfirm, onClose, loading }: {
 }
 
 // ─── Post Card ────────────────────────────────────────────────────────────────
-function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
+function PostCard({ recipe, likedIds, onLike, onFork, onComment, isNew }: {
   recipe: Recipe;
   likedIds: Set<string>;
   onLike: (id: string, e: React.MouseEvent) => void;
   onFork: (r: Recipe) => void;
   onComment: (recipeId: string, text: string) => Promise<void>;
+  isNew?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -305,9 +332,13 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
   const liked = likedIds.has(recipe._id);
   const comments = recipe.comments || [];
 
+  // Sync expanded state when isNew becomes true (new post just submitted)
+  useEffect(() => {
+    if (isNew) setExpanded(true);
+  }, [isNew]);
+
   return (
-    <article className={styles.postCard}>
-      {/* Main content */}
+    <article className={`${styles.postCard} ${isNew ? styles.postCardNew : ''}`}>
       <div className={styles.postBody}>
         {/* Post header */}
         <div className={styles.postMeta}>
@@ -340,15 +371,39 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
           ))}
         </div>
 
-        {/* Expand/collapse instructions */}
+        {/* Instructions — slide down when isNew, collapsible otherwise */}
         {recipe.instructions && (
-          <div className={styles.instructionsWrap}>
-            <p className={`${styles.instructionsText} ${expanded ? styles.instructionsExpanded : ''}`}>
-              {recipe.instructions}
-            </p>
-            <button className={styles.expandBtn} onClick={() => setExpanded(e => !e)}>
-              {expanded ? '▲ collapse' : '▼ read more'}
-            </button>
+          <div className={`${styles.instructionsWrap} ${isNew ? styles.instructionsWrapNew : ''}`}>
+            {isNew && (
+              <div className={styles.newInstructionsBadge}>
+                📋 preparation process
+              </div>
+            )}
+            {(() => {
+              const parsed = parseInstructions(recipe.instructions);
+              if (parsed.isSteps && parsed.steps) {
+                return (
+                  <ol className={`${styles.instructionsSteps} ${expanded ? styles.instructionsStepsExpanded : ''} ${isNew ? styles.instructionsStepsNew : ''}`}>
+                    {parsed.steps.map((step, index) => (
+                      <li key={index} className={styles.stepItem}>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                );
+              } else {
+                return (
+                  <p className={`${styles.instructionsText} ${expanded ? styles.instructionsExpanded : ''} ${isNew ? styles.instructionsTextNew : ''}`}>
+                    {parsed.content || recipe.instructions}
+                  </p>
+                );
+              }
+            })()}
+            {!isNew && (
+              <button className={styles.expandBtn} onClick={() => setExpanded(e => !e)}>
+                {expanded ? '▲ collapse' : '▼ read more'}
+              </button>
+            )}
           </div>
         )}
 
@@ -364,7 +419,6 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
 
         {/* Action bar */}
         <div className={styles.actionBar}>
-          {/* ★ NEW LIKE BUTTON */}
           <LikeButton
             recipeId={recipe._id}
             count={recipe.likesCount}
@@ -379,7 +433,6 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment }: {
             💬 <span>{comments.length + (recipe.commentCount || 0)}</span>
           </button>
 
-          {/* ★ REACTION BAR */}
           <ReactionBar recipeId={recipe._id} />
 
           <button className={styles.actionBarBtn} onClick={() => onFork(recipe)}>
@@ -533,6 +586,9 @@ export default function CommunityKitchen() {
   const [showNewPost, setShowNewPost] = useState(false);
   const [postLoading, setPostLoading] = useState(false);
 
+  // Track which recipe IDs were just posted (for slide-down animation)
+  const [newRecipeIds, setNewRecipeIds] = useState<Set<string>>(new Set());
+
   const [toast, setToast]             = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const toastTimer                    = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -584,7 +640,6 @@ export default function CommunityKitchen() {
 
   // ── Like (with floating heart) ────────────────────────────────────────────
   const handleLike = async (recipeId: string, e: React.MouseEvent) => {
-    // Spawn floating heart
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const emoji = likedIds.has(recipeId) ? '💔' : '❤️';
     setHearts(prev => [...prev, { id: ++heartId.current, x: rect.left + rect.width / 2, y: rect.top, emoji }]);
@@ -667,6 +722,8 @@ export default function CommunityKitchen() {
         setRecipes(prev => [result.recipe, ...prev]);
         setTotal(t => t + 1);
         setShowNewPost(false);
+        // Mark this recipe as newly posted → triggers slide-down animation
+        setNewRecipeIds(prev => new Set(prev).add(result.recipe._id));
         showToast('🍽 posted to community!');
       }
     } catch {
@@ -833,6 +890,7 @@ export default function CommunityKitchen() {
                 onLike={handleLike}
                 onFork={setForkTarget}
                 onComment={handleComment}
+                isNew={newRecipeIds.has(recipe._id)}
               />
             ))}
           </div>

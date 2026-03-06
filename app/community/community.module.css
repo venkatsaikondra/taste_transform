@@ -60,7 +60,8 @@
 }
 
 .bannerSub {
-  color: #555;
+  /* FIX: was #555, bumped to #999 for legibility */
+  color: #999;
   font-size: 0.75rem;
   letter-spacing: 0.08rem;
   margin: 0;
@@ -78,12 +79,14 @@
 }
 
 .statItem {
+  /* FIX: was #444, bumped to #888 */
   font-size: 0.68rem;
-  color: #444;
+  color: #888;
   letter-spacing: 0.05rem;
 }
 
-.statDivider { color: #2a2a2a; }
+/* FIX: was #2a2a2a, now visible */
+.statDivider { color: #555; }
 
 /* ── Activity Ticker ─────────────────────────────────────────────────────────── */
 .activityTicker {
@@ -95,7 +98,8 @@
   border-radius: 20px;
   padding: 5px 14px;
   font-size: 0.68rem;
-  color: #555;
+  /* FIX: was #555, bumped to #aaa */
+  color: #aaa;
   max-width: 260px;
   overflow: hidden;
   white-space: nowrap;
@@ -154,12 +158,13 @@
   color: #c5fb45;
   letter-spacing: 0.2rem;
   margin: 0 0 0.75rem;
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 .sideCardText {
+  /* FIX: was #666, bumped to #999 */
   font-size: 0.78rem;
-  color: #666;
+  color: #999;
   line-height: 1.6;
   margin: 0 0 1rem;
 }
@@ -194,7 +199,8 @@
   background: transparent;
   border: none;
   text-align: left;
-  color: #555;
+  /* FIX: was #555, bumped to #888 */
+  color: #888;
   font-family: 'Courier New', monospace;
   font-size: 0.75rem;
   letter-spacing: 0.05rem;
@@ -211,7 +217,8 @@
 .sideVibeBtnActive { color: #c5fb45; background: rgba(197,251,69,0.08); font-weight: bold; }
 
 .rulesList {
-  color: #555;
+  /* FIX: was #555, bumped to #999 */
+  color: #999;
   font-size: 0.72rem;
   line-height: 2;
   padding-left: 1.2rem;
@@ -227,8 +234,9 @@
 
 .trendingTag {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #666;
+  border: 1px solid rgba(255,255,255,0.15);
+  /* FIX: was #666, bumped to #bbb */
+  color: #bbb;
   font-family: 'Courier New', monospace;
   font-size: 0.65rem;
   padding: 3px 9px;
@@ -265,7 +273,8 @@
 .sortTab {
   background: transparent;
   border: 1px solid transparent;
-  color: #555;
+  /* FIX: was #555, bumped to #999 */
+  color: #999;
   font-family: 'Courier New', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.08rem;
@@ -275,7 +284,7 @@
   transition: all 0.15s;
 }
 
-.sortTab:hover { color: #aaa; background: rgba(255,255,255,0.04); }
+.sortTab:hover { color: #ddd; background: rgba(255,255,255,0.04); }
 .sortTabActive { background: rgba(197,251,69,0.1); border-color: rgba(197,251,69,0.3); color: #c5fb45; }
 
 .searchWrap {
@@ -293,12 +302,13 @@
 
 .searchWrap:focus-within { border-color: rgba(197,251,69,0.3); }
 
-.searchIconInline { color: #444; font-size: 1rem; }
+.searchIconInline { color: #888; font-size: 1rem; }
 .searchInputInline {
   background: transparent; border: none; outline: none;
+  /* FIX: was white but placeholder was #333 (invisible) — now placeholder is #666 */
   color: white; font-family: 'Courier New', monospace; font-size: 0.75rem; width: 100%;
 }
-.searchInputInline::placeholder { color: #333; }
+.searchInputInline::placeholder { color: #666; }
 
 /* ── Post Card ──────────────────────────────────────────────────────────────── */
 .postList { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -312,6 +322,12 @@
   overflow: hidden;
   transition: border-color 0.2s, box-shadow 0.2s;
   animation: slideIn 0.3s ease both;
+}
+
+/* NEW: highlight border for freshly posted cards */
+.postCardNew {
+  border-color: rgba(197, 251, 69, 0.35) !important;
+  box-shadow: 0 0 20px rgba(197, 251, 69, 0.08);
 }
 
 @keyframes slideIn {
@@ -349,7 +365,8 @@
 
 .forkedPill {
   font-size: 0.62rem;
-  color: #888;
+  /* FIX: was #888, now #bbb */
+  color: #bbb;
   background: rgba(255,255,255,0.06);
   padding: 1px 7px;
   border-radius: 3px;
@@ -365,9 +382,12 @@
   vertical-align: middle;
 }
 
-.postAuthor { font-size: 0.68rem; color: #555; display: flex; align-items: center; gap: 3px; }
-.postAuthor strong { color: #888; }
-.postTime { font-size: 0.65rem; color: #3a3a3a; }
+/* FIX: author was #555 (barely visible), now #999 / #ccc */
+.postAuthor { font-size: 0.68rem; color: #999; display: flex; align-items: center; gap: 3px; }
+.postAuthor strong { color: #ccc; }
+
+/* FIX: post time was #3a3a3a (nearly invisible), now #777 */
+.postTime { font-size: 0.65rem; color: #777; }
 
 /* Calorie Meter */
 .calMeter {
@@ -397,7 +417,8 @@
 .bookmarkBtn {
   background: transparent;
   border: none;
-  color: #444;
+  /* FIX: was #444, now #888 */
+  color: #888;
   font-size: 0.85rem;
   cursor: pointer;
   padding: 2px 5px;
@@ -406,7 +427,7 @@
   line-height: 1;
 }
 
-.bookmarkBtn:hover { background: rgba(255,255,255,0.06); }
+.bookmarkBtn:hover { background: rgba(255,255,255,0.06); color: #ccc; }
 .bookmarkActive { color: #c5fb45 !important; }
 
 .postTitle {
@@ -431,11 +452,12 @@
 }
 .ingEmojiBig:hover { transform: scale(1.3); }
 
-/* Instructions */
+/* ── Instructions ─────────────────────────────────────────────────────────── */
 .instructionsWrap { margin-bottom: 0.6rem; }
 
 .instructionsText {
-  color: #777;
+  /* FIX: was #777, bumped to #bbb for readability */
+  color: #bbb;
   font-size: 0.78rem;
   line-height: 1.6;
   margin: 0 0 0.3rem;
@@ -448,6 +470,39 @@
 
 .instructionsExpanded { -webkit-line-clamp: unset; overflow: visible; display: block; }
 
+.instructionsSteps {
+  /* FIX: was #777, bumped to #bbb */
+  color: #bbb;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  margin: 0 0 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: all 0.2s;
+  padding-left: 1rem;
+  counter-reset: step-counter;
+}
+
+.instructionsStepsExpanded {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  display: block;
+}
+
+.stepItem {
+  margin-bottom: 0.5rem;
+  counter-increment: step-counter;
+}
+
+.stepItem::before {
+  content: counter(step-counter) ". ";
+  color: #c5fb45;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
 .expandBtn {
   background: transparent;
   border: none;
@@ -457,10 +512,65 @@
   letter-spacing: 0.08rem;
   cursor: pointer;
   padding: 0;
-  opacity: 0.6;
+  opacity: 0.7;
   transition: opacity 0.15s;
 }
 .expandBtn:hover { opacity: 1; }
+
+/* ── NEW: Slide-down instructions for freshly posted recipes ──────────────── */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+    transform: translateY(0);
+    padding-top: 0.75rem;
+    padding-bottom: 0.25rem;
+    overflow: visible;
+  }
+}
+.instructionsWrapNew {
+  animation: slideDown 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  border-left: 2px solid rgba(197, 251, 69, 0.5);
+  padding-left: 0.85rem;
+  margin-bottom: 0.8rem;
+  background: rgba(197, 251, 69, 0.03);
+  border-radius: 0 6px 6px 0;
+  overflow: visible; /* ← was "hidden", caused clipping after animation */
+}
+
+/* Badge label above instructions */
+.newInstructionsBadge {
+  font-size: 0.6rem;
+  color: #c5fb45;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+/* Instructions text inside new posts: fully visible, no height clamping */
+.instructionsTextNew {
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+  color: #ddd !important;
+}
+
+.instructionsStepsNew {
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+  color: #ddd !important;
+}
 
 /* Ingredient chips */
 .ingredientChips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.75rem; }
@@ -469,16 +579,18 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 6px;
   padding: 3px 8px;
   font-size: 0.68rem;
-  color: #aaa;
+  /* FIX: was #aaa, bumped to #ccc */
+  color: #ccc;
   transition: border-color 0.15s;
 }
 .ingChip:hover { border-color: rgba(197,251,69,0.3); }
-.ingChip em { font-style: normal; color: #444; font-size: 0.6rem; margin-left: 2px; }
+/* FIX: was #444 (invisible), now #888 */
+.ingChip em { font-style: normal; color: #888; font-size: 0.6rem; margin-left: 2px; }
 
 /* ── Action bar ──────────────────────────────────────────────────────────────── */
 .actionBar {
@@ -487,14 +599,15 @@
   gap: 2px;
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255,255,255,0.07);
   flex-wrap: wrap;
 }
 
 .actionBarBtn {
   background: transparent;
   border: none;
-  color: #555;
+  /* FIX: was #555, now #999 */
+  color: #999;
   font-family: 'Courier New', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.05rem;
@@ -514,8 +627,9 @@
   align-items: center;
   gap: 5px;
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: #777;
+  border: 1px solid rgba(255,255,255,0.1);
+  /* FIX: was #777, bumped to #bbb */
+  color: #bbb;
   font-family: 'Courier New', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.05rem;
@@ -566,7 +680,8 @@
 
 .likeBtn:hover .likeHeart { transform: scale(1.2); }
 
-.likeCount { font-weight: bold; min-width: 18px; }
+/* FIX: like count was invisible when zero (#555), now always legible */
+.likeCount { font-weight: bold; min-width: 18px; color: inherit; }
 
 /* ── Reaction Bar ────────────────────────────────────────────────────────────── */
 .reactionWrap {
@@ -578,15 +693,15 @@
 
 .reactionToggle {
   background: transparent;
-  border: none;
-  color: #555;
+  border: 1px solid transparent;
+  /* FIX: was #555, now #999 */
+  color: #999;
   font-family: 'Courier New', monospace;
   font-size: 0.72rem;
   padding: 4px 10px;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.15s;
-  border: 1px solid transparent;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -594,8 +709,8 @@
 
 .reactionToggle:hover {
   background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.1);
-  color: #aaa;
+  border-color: rgba(255,255,255,0.15);
+  color: #ddd;
 }
 
 .topReactions { font-size: 0.85rem; letter-spacing: -2px; }
@@ -644,7 +759,7 @@
 .commentSection {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255,255,255,0.06);
   animation: fadeDown 0.2s ease;
 }
 
@@ -654,12 +769,13 @@
 }
 
 .commentInputRow { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
-.commentAvatar { font-size: 1rem; opacity: 0.4; flex-shrink: 0; }
+/* FIX: avatar was too faded */
+.commentAvatar { font-size: 1rem; opacity: 0.6; flex-shrink: 0; }
 
 .commentInput {
   flex: 1;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 6px;
   color: white;
   font-family: 'Courier New', monospace;
@@ -669,7 +785,8 @@
   transition: border-color 0.15s;
 }
 .commentInput:focus { border-color: rgba(197,251,69,0.4); }
-.commentInput::placeholder { color: #333; }
+/* FIX: placeholder was #333 (invisible on dark bg), now #666 */
+.commentInput::placeholder { color: #666; }
 
 .commentSubmit {
   background: rgba(197,251,69,0.12);
@@ -694,12 +811,14 @@
   gap: 0.5rem;
   font-size: 0.75rem;
   padding: 4px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
-.commentAuthor { color: #c5fb45; font-size: 0.68rem; font-weight: bold; flex-shrink: 0; opacity: 0.7; }
-.commentText   { color: #999; flex: 1; line-height: 1.5; }
-.commentTime   { color: #333; font-size: 0.62rem; flex-shrink: 0; }
+.commentAuthor { color: #c5fb45; font-size: 0.68rem; font-weight: bold; flex-shrink: 0; opacity: 0.85; }
+/* FIX: was #999, bumped to #ccc */
+.commentText   { color: #ccc; flex: 1; line-height: 1.5; }
+/* FIX: was #333 (invisible), now #777 */
+.commentTime   { color: #777; font-size: 0.62rem; flex-shrink: 0; }
 
 /* ── New Post Button (header) ─────────────────────────────────────────────────── */
 .newPostBtn {
@@ -777,20 +896,23 @@
   align-items: center;
   gap: 0.75rem;
   padding: 5rem 2rem;
-  color: #444;
+  /* FIX: was #444, bumped to #777 */
+  color: #777;
   font-size: 0.85rem;
   letter-spacing: 0.15rem;
 }
-.emptyIcon { font-size: 3rem; opacity: 0.3; }
-.emptyHint { font-size: 0.7rem; color: #333; }
+.emptyIcon { font-size: 3rem; opacity: 0.4; }
+/* FIX: emptyHint was #333 (invisible), now #666 */
+.emptyHint { font-size: 0.7rem; color: #666; }
 
 /* ── Pagination ──────────────────────────────────────────────────────────────── */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 2rem; }
 
 .pageBtn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #888;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* FIX: was #888, bumped to #ccc */
+  color: #ccc;
   font-family: 'Courier New', monospace;
   font-size: 0.75rem;
   letter-spacing: 0.1rem;
@@ -801,7 +923,8 @@
 }
 .pageBtn:hover:not(:disabled) { border-color: #c5fb45; color: #c5fb45; }
 .pageBtn:disabled { opacity: 0.25; cursor: not-allowed; }
-.pageInfo { font-size: 0.75rem; color: #555; letter-spacing: 0.1rem; }
+/* FIX: pageInfo was #555, now #999 */
+.pageInfo { font-size: 0.75rem; color: #999; letter-spacing: 0.1rem; }
 
 /* ── Modal Overlay ───────────────────────────────────────────────────────────── */
 .modalOverlay {
@@ -838,8 +961,9 @@
 
 .forkIconBig { font-size: 2.5rem; margin-bottom: 0.75rem; }
 .forkTitle { color: #c5fb45; font-size: 1.1rem; letter-spacing: 0.2rem; margin: 0 0 0.75rem; }
-.forkDesc { color: #777; font-size: 0.8rem; line-height: 1.6; margin: 0 0 1.5rem; }
-.forkDesc strong { color: #ccc; }
+/* FIX: was #777, now #aaa */
+.forkDesc { color: #aaa; font-size: 0.8rem; line-height: 1.6; margin: 0 0 1.5rem; }
+.forkDesc strong { color: #eee; }
 .forkActions { display: flex; gap: 0.75rem; justify-content: center; }
 
 /* ── New Post Modal ──────────────────────────────────────────────────────────── */
@@ -869,8 +993,9 @@
   width: 28px; height: 28px;
   border-radius: 50%;
   background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: #555;
+  border: 1px solid rgba(255,255,255,0.2);
+  /* FIX: was #555, now #999 */
+  color: #999;
   font-family: 'Courier New', monospace;
   font-size: 0.72rem;
   cursor: pointer;
@@ -888,15 +1013,16 @@
 .stepLine {
   flex: 1;
   height: 1px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.1);
   margin: 0 -14px;
   z-index: 0;
 }
 
 .modalCloseX {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #555;
+  border: 1px solid rgba(255,255,255,0.15);
+  /* FIX: was #555, now #aaa */
+  color: #aaa;
   font-family: 'Courier New', monospace;
   font-size: 0.7rem;
   padding: 4px 10px;
@@ -906,12 +1032,19 @@
 }
 .modalCloseX:hover { color: #c5fb45; border-color: #c5fb45; }
 
-.fieldLabel { display: block; font-size: 0.62rem; color: #c5fb45; letter-spacing: 0.2rem; margin-bottom: 0.4rem; opacity: 0.65; }
+.fieldLabel {
+  display: block;
+  font-size: 0.62rem;
+  color: #c5fb45;
+  letter-spacing: 0.2rem;
+  margin-bottom: 0.4rem;
+  opacity: 0.8;
+}
 
 .fieldInput {
   width: 100%;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   color: white;
   font-family: 'Courier New', monospace;
@@ -923,12 +1056,13 @@
   transition: border-color 0.15s;
 }
 .fieldInput:focus { border-color: rgba(197,251,69,0.45); }
-.fieldInput::placeholder { color: #333; }
+/* FIX: was #333 (near-invisible), now #666 */
+.fieldInput::placeholder { color: #666; }
 
 .fieldTextarea {
   width: 100%;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   color: white;
   font-family: 'Courier New', monospace;
@@ -942,14 +1076,16 @@
   transition: border-color 0.15s;
 }
 .fieldTextarea:focus { border-color: rgba(197,251,69,0.45); }
-.fieldTextarea::placeholder { color: #333; }
+/* FIX: was #333 (near-invisible), now #666 */
+.fieldTextarea::placeholder { color: #666; }
 
 .vibeSelect { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.2rem; }
 
 .vibeSelectBtn {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #666;
+  border: 1px solid rgba(255,255,255,0.12);
+  /* FIX: was #666, now #bbb */
+  color: #bbb;
   font-family: 'Courier New', monospace;
   font-size: 0.68rem;
   letter-spacing: 0.08rem;
@@ -966,8 +1102,9 @@
 /* ── Shared button styles ────────────────────────────────────────────────────── */
 .cancelBtn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #666;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* FIX: was #666, now #bbb */
+  color: #bbb;
   font-family: 'Courier New', monospace;
   font-size: 0.75rem;
   letter-spacing: 0.1rem;
@@ -976,7 +1113,7 @@
   cursor: pointer;
   transition: all 0.15s;
 }
-.cancelBtn:hover { border-color: rgba(255, 255, 255, 0.25); color: #aaa; }
+.cancelBtn:hover { border-color: rgba(255, 255, 255, 0.35); color: #eee; }
 
 .confirmBtn {
   background: #c5fb45;
