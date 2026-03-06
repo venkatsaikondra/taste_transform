@@ -37,12 +37,10 @@ export default function About() {
           </div>
 
           <h2 className={styles.label}>THE MISSION</h2>
-          <h3 className={styles.title}>Ending "Fridge Fatigue" with LLMs.</h3>
+          <h3 className={styles.title}>Ending "Kitchen Confusion" with LLMs.</h3>
           
           <p className={styles.description}>
-            Foodzilla was born out of the common kitchen dilemma: a fridge full of 
-            random ingredients and zero inspiration. We use Large Language Models 
-            to bridge the gap between waste and taste.
+           Foodzilla solves a common kitchen problem — having a fridge full of random ingredients but not knowing what to cook. Using Large Language Models (LLMs), Foodzilla helps turn those unused ingredients into tasty meal ideas instead of letting them go to waste.
           </p>
 
          
@@ -55,23 +53,23 @@ export default function About() {
               <span className={styles.pointNumber}>01</span>
               <div>
                 <strong>Zero Waste Vision</strong>
-                <p>Helping you use that half-used jar of pesto before it becomes a science project.</p>
+                <p>We help you use leftover ingredients before they go to waste.</p>
               </div>
             </li>
 
             <li>
               <span className={styles.pointNumber}>02</span>
               <div>
-                <strong>Hallucinated Creativity</strong>
-                <p>Our AI suggests cooking steps that push the boundaries of traditional culinary arts.</p>
+                <strong>Creative Cooking Ideas</strong>
+                <p>Our AI suggests simple and creative cooking steps using the ingredients you already have.</p>
               </div>
             </li>
 
             <li>
               <span className={styles.pointNumber}>03</span>
               <div>
-                <strong>Instant Planning</strong>
-                <p>From "I have nothing to eat" to a full recipe in under 2 seconds.</p>
+                <strong>Instant Recipe Planning</strong>
+                <p>From "I have nothing to eat" into a complete recipe in just a few seconds.</p>
               </div>
             </li>
             

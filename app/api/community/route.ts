@@ -3,9 +3,6 @@ import { connect } from '@/dbConfig/dbConfig';
 import Recipe from '@/models/recipeModel';
 import Comment from '@/models/commentModel';
 
-// kept nearly identical to the recipes/publish endpoint so that callers
-// can continue using `/api/community` without encountering 404s.
-
 export async function GET(request: Request) {
   try {
     await connect();
@@ -17,7 +14,6 @@ export async function GET(request: Request) {
     const limit   = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
     const page    = Math.max(parseInt(searchParams.get('page') || '1'), 1);
 
-    // Build filter
     const filter: Record<string, unknown> = { isPublic: true };
     if (search) {
       filter.$or = [
@@ -27,25 +23,19 @@ export async function GET(request: Request) {
     }
     if (vibe && vibe !== 'all') filter.vibe = vibe;
 
-    // Sort strategy
     const sortMap: Record<string, Record<string, 1 | -1>> = {
-      newest:  { createdAt: -1 },
-      popular: { likesCount: -1, createdAt: -1 },
-      calories_low: { totalCalories: 1 },
+      newest:        { createdAt: -1 },
+      popular:       { likesCount: -1, createdAt: -1 },
+      calories_low:  { totalCalories: 1 },
       calories_high: { totalCalories: -1 },
     };
-    const sortQuery = (sortMap[sort] ?? sortMap.newest) as any; // mongoose typing is picky
+    const sortQuery = (sortMap[sort] ?? sortMap.newest) as any;
 
     const [rawRecipes, total] = await Promise.all([
-      Recipe.find(filter)
-        .sort(sortQuery)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
+      Recipe.find(filter).sort(sortQuery).skip((page - 1) * limit).limit(limit).lean(),
       Recipe.countDocuments(filter),
     ]);
 
-    // attach comments for each recipe to enable client-side display
     const recipeIds = rawRecipes.map((r: any) => r._id);
     const allComments = await Comment.find({ recipeId: { $in: recipeIds } })
       .sort({ createdAt: 1 })
@@ -60,6 +50,8 @@ export async function GET(request: Request) {
 
     const recipes = rawRecipes.map((r: any) => ({
       ...r,
+      // ← MAP steps → instructions so the frontend PostCard can read it
+      instructions: r.steps || r.recipeText || '',
       likesCount: r.likesCount || (Array.isArray(r.likes) ? r.likes.length : 0),
       comments: commentsByRecipe[String(r._id)] || [],
       commentCount: (commentsByRecipe[String(r._id)] || []).length,
@@ -72,7 +64,6 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/community  — body: { action: 'like'|'fork', recipeId, userId }
 export async function POST(request: Request) {
   try {
     await connect();
@@ -83,7 +74,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
 
-    // Like action (same as before)
     if (action === 'like') {
       if (!recipeId) return NextResponse.json({ error: 'Missing recipeId' }, { status: 400 });
 
@@ -102,7 +92,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ liked: !alreadyLiked, likesCount: recipe.likesCount });
     }
 
-    // Fork action
     if (action === 'fork') {
       if (!recipeId) return NextResponse.json({ error: 'Missing recipeId' }, { status: 400 });
 
@@ -125,7 +114,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ forked: true, newRecipeId: forked._id });
     }
 
-    // Comment action
     if (action === 'comment') {
       const { text } = body;
       if (!recipeId || !text) {
@@ -138,22 +126,46 @@ export async function POST(request: Request) {
       return NextResponse.json({ comment });
     }
 
-    // Publish new recipe
     if (action === 'publish') {
       const { recipeName, vibe, instructions } = body;
-      if (!recipeName || !instructions) {
-        return NextResponse.json({ error: 'Missing recipeName or instructions' }, { status: 400 });
+      if (!recipeName) {
+        return NextResponse.json({ error: 'Missing recipeName' }, { status: 400 });
       }
+
       const newRecipe = new Recipe({
         authorId: String(userId),
         recipeName,
-        vibe: vibe || 'Safe',
-        steps: instructions,
-        recipeText: instructions,
+        vibe: vibe || 'cozy',
+        // ← schema field is `steps`, not `instructions`
+        steps: instructions || '',
+        recipeText: instructions || '',
+        ingredients: [],
+        totalCalories: 0,
+        likes: [],
+        likesCount: 0,
         isPublic: true,
       });
+
       await newRecipe.save();
-      return NextResponse.json({ recipe: newRecipe });
+
+      // ← explicitly map steps → instructions in the response
+      return NextResponse.json({
+        recipe: {
+          _id: newRecipe._id,
+          authorId: newRecipe.authorId,
+          recipeName: newRecipe.recipeName,
+          vibe: newRecipe.vibe,
+          instructions: instructions || '',   // ← the key fix
+          ingredients: [],
+          totalCalories: 0,
+          likes: [],
+          likesCount: 0,
+          isPublic: true,
+          comments: [],
+          commentCount: 0,
+          createdAt: newRecipe.createdAt,
+        },
+      });
     }
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
