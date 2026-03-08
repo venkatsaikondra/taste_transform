@@ -299,11 +299,6 @@ This project is licensed under the MIT License. See LICENSE file for details.
 - **Email**: support@foodzilla.app (if applicable)
 - **Documentation**: Full API docs available at /docs
 
-## Acknowledgments
 
-- Hugging Face for AI model infrastructure
-- Next.js team for the excellent framework
-- MongoDB for database solutions
-- Open source community for various tools and libraries
 
 
