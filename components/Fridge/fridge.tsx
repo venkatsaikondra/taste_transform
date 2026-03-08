@@ -301,8 +301,6 @@ const CATEGORIES = [
   },
 ];
 
-const VIBES = ['Safe'];
-
 type Item = {
   id: string;
   name: string;
@@ -343,7 +341,6 @@ function Particle({
       { duration: 600, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', fill: 'forwards' }
     );
     anim.onfinish = onDone;
-    // Cleanup if unmounted
     return () => anim.cancel();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -373,7 +370,6 @@ export default function Fridge() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [vibe, setVibe] = useState(0);
   const [particles, setParticles] = useState<
     { id: number; emoji: string; sx: number; sy: number; ex: number; ey: number }[]
   >([]);
@@ -392,11 +388,9 @@ export default function Fridge() {
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
 
-
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial data fetch from MongoDB Atlas
     const timer = setTimeout(() => setIsAppLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
@@ -410,7 +404,6 @@ export default function Fridge() {
     ) ?? [];
   }, [currentCategory, searchQuery]);
 
-  // Also support searching across ALL categories when no category selected
   const globalSearchResults = React.useMemo(() => {
     if (!searchQuery.trim() || activeCategory) return [];
     const q = searchQuery.toLowerCase();
@@ -474,9 +467,6 @@ export default function Fridge() {
   const totalCal = cart.reduce((sum, c) => sum + c.cal * c.qty, 0);
   const totalItems = cart.reduce((s, c) => s + c.qty, 0);
 
-  const vibeColor = vibe === 0 ? '#22c55e' : vibe === 1 ? '#f97316' : '#ec4899';
-  const vibeLabel = VIBES[vibe];
-
   // Format recipe text by removing markdown and detecting sections
   const formatRecipeText = (text: string) => {
     const formatted: Array<{ type: 'header' | 'list' | 'text'; content: string }> = [];
@@ -486,17 +476,14 @@ export default function Fridge() {
       let cleaned = line.trim();
       if (!cleaned) continue;
       
-      // Remove markdown bold/italic
       cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
       cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
       
-      // Detect headers
       if (
         /^(Recipe Name|Ingredients|Instructions|Steps|Tips and Variations|Notes|Nutrition|Servings)/i.test(cleaned)
       ) {
         formatted.push({ type: 'header', content: cleaned });
       }
-      // Detect list items
       else if (/^[-•*]\s/.test(cleaned)) {
         cleaned = cleaned.replace(/^[-•*]\s/, '');
         formatted.push({ type: 'list', content: cleaned });
@@ -511,7 +498,7 @@ export default function Fridge() {
 
   // ── Recipe generation ────────────────────────────────────────────────────────
   async function generateRecipe() {
-   setGenError(null);
+    setGenError(null);
     setRecipeText(null);
     setVideos([]);
     setSaveSuccess(false);
@@ -527,7 +514,7 @@ export default function Fridge() {
       const res = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients, vibe: vibeLabel }),
+        body: JSON.stringify({ ingredients, vibe: 'Safe' }),
       });
       const data = await res.json();
 
@@ -538,7 +525,6 @@ export default function Fridge() {
 
       setRecipeText(data.recipe ?? JSON.stringify(data));
 
-      // Scroll to recipe section
       setTimeout(() => {
         generationRef.current?.scrollIntoView({
           behavior: 'smooth',
@@ -546,7 +532,6 @@ export default function Fridge() {
         });
       }, 200);
 
-      // YouTube search — use first 2 ingredients + "recipe" as query
       try {
         const youtubeRes = await fetch(
           `/api/youtube?query=${encodeURIComponent(ingredients.slice(0, 2).join(' ') + ' recipe')}`
@@ -572,7 +557,6 @@ export default function Fridge() {
     setSaving(true);
     setSaveSuccess(false);
     try {
-      // Extract recipe name from the text (usually first line)
       const lines = recipeText.split('\n').filter(l => l.trim());
       const recipeName = lines[0]?.replace(/^(recipe:|name:)/i, '').trim() || 'Untitled Recipe';
 
@@ -583,7 +567,7 @@ export default function Fridge() {
           recipeName,
           ingredients: cart.map(c => ({ name: c.name, emoji: c.emoji, quantity: c.qty })),
           steps: recipeText,
-          vibe: vibeLabel,
+          vibe: 'Safe',
           totalCalories: totalCal,
           recipeText,
           videos: videos,
@@ -616,7 +600,6 @@ export default function Fridge() {
     });
   };
 
-  // ── Determine what items to show ─────────────────────────────────────────────
   const showGlobalSearch = !activeCategory && searchQuery.trim().length > 0;
 
   return (
@@ -653,7 +636,7 @@ export default function Fridge() {
           <div className={styles.fridgeHeader}>
             <span className={styles.fridgeIcon}>❄️</span>
             <div>
-              <h1 className={styles.fridgeTitle}>Digital Pantry</h1>
+              <h1 className={styles.fridgeTitle}>Ingredient Box</h1>
               <p className={styles.fridgeSub}>Pick your ingredients</p>
             </div>
           </div>
@@ -700,7 +683,6 @@ export default function Fridge() {
           {/* Item grid */}
           <div className={`${styles.itemGrid} ${(currentCategory || showGlobalSearch) ? styles.itemGridVisible : ''}`}>
 
-            {/* Global search results (no category selected) */}
             {showGlobalSearch ? (
               <>
                 <div className={styles.categoryBanner} style={{ '--cat-color': '#94a3b8' } as React.CSSProperties}>
@@ -815,26 +797,6 @@ export default function Fridge() {
             </div>
           </div>
 
-          {/* Vibe selector */}
-          <div className={styles.vibeSection}>
-            <div className={styles.vibeHeader}>
-              <span className={styles.vibeLabel}>Cooking Vibe</span>
-              <span className={styles.vibeValue} style={{ color: vibeColor }}>{vibeLabel}</span>
-            </div>
-            <div className={styles.vibePills}>
-              {VIBES.map((v, i) => (
-                <button
-                  key={v}
-                  className={`${styles.vibePill} ${vibe === i ? styles.vibePillActive : ''}`}
-                  style={{ '--vibe-col': (i === 0 ? '#22c55e' : i === 1 ? '#f97316' : '#ec4899') } as React.CSSProperties}
-                  onClick={() => setVibe(i)}
-                >
-                  {i === 0 ? '🍽️' : i === 1 ? '🔬' : '🚀'} {v}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className={styles.cartItems}>
             {cart.length === 0 ? (
               <div className={styles.cartEmpty}>
@@ -872,14 +834,23 @@ export default function Fridge() {
                 </div>
               )}
 
+              {/* ── Generate Recipe Button ── */}
               <button
-                className={styles.cookBtn}
-                style={{ '--vibe-color': vibeColor } as React.CSSProperties}
+                className={styles.generateBtn}
                 onClick={generateRecipe}
                 disabled={generating}
               >
-                <span>{generating ? 'Generating…' : `Cook with ${vibeLabel} Mode`}</span>
-                <span>{vibe === 0 ? '🍽️' : vibe === 1 ? '🔬' : '🚀'}</span>
+                {generating ? (
+                  <>
+                    <span className={styles.generateBtnSpinner} />
+                    <span>Generating…</span>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.generateBtnIcon}>✨</span>
+                    <span>Generate Recipe</span>
+                  </>
+                )}
               </button>
 
               <button className={styles.clearBtn} onClick={() => {
@@ -986,6 +957,5 @@ export default function Fridge() {
       )}
     </div>
     </>
-   
   );
 }
