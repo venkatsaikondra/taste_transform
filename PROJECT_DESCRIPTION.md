@@ -1,231 +1,313 @@
-# Taste Transform - Project Description
+# Foodzilla - Project Description
 
-## 📖 Overview
+## Executive Summary
 
-**Taste Transform** is a comprehensive AI-powered recipe generation and community platform that revolutionizes the way people discover, create, and share culinary experiences. Built with modern web technologies, the platform combines artificial intelligence with social features to create an engaging cooking and recipe management ecosystem.
+Foodzilla (formerly Taste Transform) is an innovative AI-powered recipe generation platform that bridges the gap between available ingredients and culinary inspiration. The application leverages modern web technologies and artificial intelligence to help users reduce food waste, discover new recipes, and connect with a vibrant cooking community.
 
-## 🎯 Project Vision
+## Project Vision
 
-Taste Transform aims to solve common cooking challenges by:
-- Helping users make the most of available ingredients
-- Reducing food waste through intelligent recipe suggestions
-- Democratizing recipe creation with AI assistance
-- Building a supportive community of food enthusiasts
-- Making cooking more accessible and enjoyable for everyone
+The core mission of Foodzilla is to eliminate kitchen confusion and food waste by providing instant, personalized recipe recommendations based on ingredients users already have. By combining AI-powered recipe generation with social features, Foodzilla creates an ecosystem where cooking becomes accessible, creative, and community-driven.
 
-## 🏗️ Architecture
-
-### Frontend Architecture
-- **Framework**: Next.js 14+ with App Router architecture
-- **Language**: TypeScript for type safety and better developer experience
-- **Styling**: CSS Modules for component-scoped styling
-- **State Management**: React hooks and server components
-- **Animations**: Lottie for smooth, performant animations
-
-### Backend Architecture
-- **API Design**: RESTful API using Next.js Route Handlers
-- **Database**: MongoDB with Mongoose ODM for flexible data modeling
-- **Authentication**: Session-based authentication with secure middleware
-- **AI Integration**: Hugging Face API for recipe generation
-- **External APIs**: YouTube API for recipe video integration
-
-### Database Models
-1. **User Model** (`userModel.js`)
-   - User authentication and profile information
-   - Saved recipes and preferences
-   - Community engagement tracking
-
-2. **Recipe Model** (`recipeModel.js`)
-   - Recipe details (ingredients, instructions, metadata)
-   - Publishing status (private/community)
-   - User relationships and authorship
-
-3. **Comment Model** (`commentModel.js`)
-   - Community engagement features
-   - Recipe discussions and feedback
-
-## 🚀 Core Features
+## Core Functionalities
 
 ### 1. AI Recipe Generation
-Users can generate custom recipes by:
-- Inputting available ingredients
-- Specifying dietary preferences
-- Setting difficulty levels
-- Adding cuisine preferences
+- **Smart Recipe Creation**: Utilizes Hugging Face's language models to generate personalized recipes
+- **Ingredient-Based Generation**: Creates recipes based on available ingredients in user's virtual fridge
+- **Dietary Preferences**: Accommodates various dietary restrictions and preferences
+- **Multiple Recipe Variations**: Generates diverse options for the same ingredient set
 
-The AI (powered by Hugging Face) creates unique, personalized recipes with:
-- Ingredient lists with quantities
-- Step-by-step cooking instructions
-- Estimated cooking and prep times
-- Nutritional information suggestions
-
-### 2. Smart Fridge Management
-The fridge feature allows users to:
-- Track current ingredients and quantities
-- Set expiration dates
-- Get recipe suggestions based on available items
-- Minimize food waste with smart recommendations
-- Organize ingredients by category
+### 2. Virtual Fridge Management
+- **Ingredient Tracking**: Users can add, remove, and manage their available ingredients
+- **Smart Organization**: Categorizes ingredients by type (proteins, vegetables, pantry items, etc.)
+- **Expiration Tracking**: Helps users prioritize ingredients that need to be used soon
+- **Recipe Matching**: Automatically suggests recipes based on current fridge contents
 
 ### 3. Community Platform
-A vibrant community where users can:
-- Browse recipes shared by other users
-- Publish their own creations
-- Comment and interact with recipes
-- Follow favorite recipe creators
-- Discover trending dishes
+- **Recipe Sharing**: Users can publish their generated or original recipes to the community
+- **Social Feed**: Browse recipes shared by other users
+- **User Interactions**: Comment, save, and engage with community recipes
+- **Profile Pages**: Showcase personal recipe collections and cooking achievements
 
-### 4. User Dashboard
-Personalized dashboard featuring:
-- Quick access to saved recipes
-- Recent recipe generation history
-- Community activity feed
-- Ingredient inventory summary
-- Personalized recommendations
+### 4. User Profile System
+- **Personalized Dashboards**: Track saved recipes, published content, and cooking history
+- **Recipe Collections**: Organize favorite recipes into custom collections
+- **Achievement System**: Gamification elements to encourage user engagement
+- **Profile Customization**: Personalize user profiles with bio, preferences, and more
 
-### 5. Profile Management
-Comprehensive user profiles with:
-- Personal information and preferences
-- Published recipe portfolio
-- Saved favorite recipes
-- Cooking activity statistics
-- Social connections
+### 5. Interactive Chat Interface
+- **AI Cooking Assistant**: Get real-time cooking advice and recipe modifications
+- **Ingredient Substitutions**: Ask for alternatives to ingredients
+- **Cooking Tips**: Receive contextual cooking guidance and techniques
 
-### 6. Interactive Chat Assistant
-AI-powered chat interface for:
-- Cooking tips and guidance
-- Recipe modifications and substitutions
-- Cooking technique questions
-- Ingredient information
-- Real-time culinary assistance
+### 6. YouTube Integration
+- **Video Tutorials**: Connect recipes with relevant cooking videos
+- **Visual Learning**: Enhance recipe understanding through video content
+- **External Resources**: Link to cooking channels and tutorials
 
-## 🔐 Security Features
+## Technical Architecture
 
-- Secure user authentication with hashed passwords
-- Session-based authorization
-- Protected API routes with middleware
-- Input validation and sanitization
-- Environment variable protection for sensitive data
+### Frontend Architecture
+- **Framework**: Next.js 14+ with App Router for optimal performance and SEO
+- **Language**: TypeScript for type safety and developer experience
+- **Styling**: CSS Modules for component-scoped styling
+- **Animations**: Lottie for smooth, lightweight animations
+- **State Management**: React hooks and context for local state management
 
-## 🎨 User Interface
+### Backend Architecture
+- **API Routes**: Next.js API routes for serverless backend functionality
+- **Database**: MongoDB with Mongoose ODM for flexible data modeling
+- **Authentication**: Session-based authentication with secure middleware
+- **AI Integration**: Hugging Face API for natural language processing and recipe generation
 
-### Design Principles
-- **Intuitive Navigation**: Easy-to-use menu system
-- **Responsive Design**: Mobile-first approach
-- **Visual Appeal**: Modern, clean aesthetics
-- **Performance**: Fast loading times with optimized assets
-- **Accessibility**: Following WCAG guidelines
+### Data Models
 
-### Key UI Components
-- **Loading Screen**: Engaging Lottie animations during data fetching
-- **Interactive Menu**: Smooth navigation between features
-- **Recipe Cards**: Visually appealing recipe displays
-- **Chat Interface**: Conversational AI interaction
-- **Form Components**: User-friendly input handling
+#### User Model
+```javascript
+{
+  username: String,
+  email: String,
+  password: String (hashed),
+  profile: {
+    bio: String,
+    avatar: String,
+    preferences: Object
+  },
+  savedRecipes: [RecipeId],
+  publishedRecipes: [RecipeId],
+  ingredients: [String],
+  createdAt: Date
+}
+```
 
-## 📊 API Endpoints
+#### Recipe Model
+```javascript
+{
+  title: String,
+  description: String,
+  ingredients: [String],
+  instructions: [String],
+  prepTime: Number,
+  cookTime: Number,
+  servings: Number,
+  difficulty: String,
+  tags: [String],
+  author: UserId,
+  isPublished: Boolean,
+  likes: Number,
+  comments: [CommentId],
+  createdAt: Date
+}
+```
 
-### Recipe Management
-- `POST /api/generate-recipe` - Generate new AI recipes
-- `GET /api/recipes` - Fetch user's recipes
-- `POST /api/recipes` - Create new recipe manually
+#### Comment Model
+```javascript
+{
+  recipeId: RecipeId,
+  userId: UserId,
+  content: String,
+  createdAt: Date
+}
+```
+
+### API Endpoints
+
+#### Authentication
+- `POST /api/users/signup` - User registration
+- `POST /api/users/login` - User authentication
+- `POST /api/users/logout` - Session termination
+- `GET /api/users/me` - Retrieve current user information
+
+#### Recipes
+- `POST /api/generate-recipe` - Generate AI-powered recipes
+- `GET /api/recipes` - Retrieve recipes (with filtering)
 - `GET /api/recipes/[id]` - Get specific recipe details
-- `PUT /api/recipes/[id]` - Update existing recipe
-- `DELETE /api/recipes/[id]` - Delete recipe
-- `POST /api/recipes/save` - Save recipe to profile
+- `POST /api/recipes/save` - Save recipe to user profile
 - `POST /api/recipes/publish` - Publish recipe to community
 
-### User Management
-- `POST /api/users/signup` - Register new user
-- `POST /api/users/login` - Authenticate user
-- `POST /api/users/logout` - End user session
-- `GET /api/users/me` - Get current user information
-
-### Community Features
+#### Community
 - `GET /api/community` - Browse community recipes
-- `POST /api/community/comment` - Add recipe comments
-- `GET /api/community/trending` - Get trending recipes
+- `POST /api/community` - Interact with community content
 
-### External Integrations
-- `GET /api/youtube` - Search for recipe videos
+#### YouTube
+- `GET /api/youtube` - Search for cooking videos
 
-## 🛠️ Development Setup
+## Key Features & Differentiators
+
+### 1. Zero-Waste Philosophy
+- Encourages use of existing ingredients
+- Reduces food waste through creative recipe generation
+- Helps users maximize their grocery shopping
+
+### 2. AI-Powered Personalization
+- Learns from user preferences over time
+- Adapts recipes to skill level and taste preferences
+- Generates contextually appropriate recipes
+
+### 3. Community-Driven Content
+- User-generated recipe library
+- Social engagement features
+- Knowledge sharing among home cooks
+
+### 4. Seamless User Experience
+- Intuitive interface design
+- Fast page loads with Next.js optimization
+- Mobile-responsive design
+- Smooth animations and transitions
+
+### 5. Educational Content
+- Integrated cooking videos
+- Step-by-step instructions
+- Cooking tips and techniques
+
+## Technology Stack Details
+
+### Frontend Dependencies
+- **React**: UI component library
+- **Next.js**: React framework with SSR/SSG capabilities
+- **TypeScript**: Static typing for JavaScript
+- **Lottie**: Animation library
+- **CSS Modules**: Component-scoped styling
+
+### Backend Dependencies
+- **MongoDB**: NoSQL database
+- **Mongoose**: MongoDB object modeling
+- **bcrypt**: Password hashing
+- **jsonwebtoken**: JWT token generation
+- **Hugging Face Transformers**: AI model integration
+
+### Development Tools
+- **ESLint**: Code linting and formatting
+- **PostCSS**: CSS processing
+- **Git**: Version control
+
+## Security Considerations
+
+- **Password Security**: Bcrypt hashing with salt rounds
+- **Session Management**: Secure session handling with HTTP-only cookies
+- **Input Validation**: Server-side validation for all user inputs
+- **SQL Injection Prevention**: Mongoose parameterized queries
+- **XSS Protection**: Next.js built-in XSS protection
+- **CORS Configuration**: Controlled cross-origin requests
+
+## Performance Optimizations
+
+- **Server-Side Rendering**: Fast initial page loads
+- **Static Generation**: Pre-rendered pages where applicable
+- **Image Optimization**: Next.js automatic image optimization
+- **Code Splitting**: Automatic route-based code splitting
+- **Lazy Loading**: Components loaded on demand
+- **API Response Caching**: Strategic caching for performance
+
+## Future Roadmap
+
+### Phase 1: Enhancement (Q2 2026)
+- Advanced dietary filters (vegan, gluten-free, keto, etc.)
+- Nutrition information integration
+- Shopping list generation
+- Recipe difficulty rating system
+
+### Phase 2: Social Features (Q3 2026)
+- User following system
+- Recipe reviews and ratings
+- Direct messaging between users
+- Cooking challenges and competitions
+
+### Phase 3: Mobile & AI (Q4 2026)
+- Mobile application (React Native)
+- Advanced AI with fine-tuned models
+- Voice-controlled recipe assistant
+- AR ingredient recognition via camera
+
+### Phase 4: Marketplace (2027)
+- Partner integrations with grocery stores
+- Ingredient delivery services
+- Premium recipe collections
+- Cooking equipment recommendations
+
+## Development Setup
 
 ### Prerequisites
-- Node.js 18 or higher
+- Node.js 18.x or higher
+- MongoDB 6.0 or higher
 - npm or yarn package manager
-- MongoDB database (local or Atlas)
-- Hugging Face API account
-- (Optional) YouTube API key
+- Git for version control
 
 ### Environment Variables
-```
-MONGODB_URI=mongodb://localhost:27017/taste_transform
-HUGGINGFACE_API_KEY=hf_xxxxxxxxxxxxx
-YOUTUBE_API_KEY=AIzaSyXXXXXXXXXXXXXXXX
-NEXTAUTH_SECRET=your_secret_key
+```env
+# Database
+MONGODB_URI=mongodb://localhost:27017/foodzilla
+
+# AI Services
+HUGGINGFACE_API_KEY=your_api_key_here
+
+# YouTube API (Optional)
+YOUTUBE_API_KEY=your_youtube_key
+
+# Authentication
+JWT_SECRET=your_secret_key
+SESSION_SECRET=your_session_secret
+
+# Environment
 NODE_ENV=development
 ```
 
-### Development Workflow
-1. Clone repository
+### Installation Steps
+1. Clone the repository
 2. Install dependencies: `npm install`
 3. Configure environment variables
-4. Run development server: `npm run dev`
-5. Access at `http://localhost:3000`
+4. Start MongoDB service
+5. Run development server: `npm run dev`
+6. Access application at `http://localhost:3000`
 
-## 📈 Future Enhancements
+## Testing Strategy
 
-### Planned Features
-- **Meal Planning**: Weekly meal plan generation
-- **Shopping Lists**: Auto-generated grocery lists
-- **Advanced Filters**: More recipe search options
-- **Social Features**: Follow system and activity feeds
-- **Recipe Ratings**: User reviews and ratings
-- **Cooking Timer**: Integrated cooking timers
-- **Voice Commands**: Hands-free cooking assistance
-- **Recipe Scaling**: Automatic ingredient adjustment
-- **Nutritional Analysis**: Detailed nutrition information
-- **Multi-language Support**: Internationalization
+- **Unit Tests**: Component and utility function testing
+- **Integration Tests**: API endpoint testing
+- **E2E Tests**: User flow testing
+- **Performance Tests**: Load testing for scalability
 
-### Technical Improvements
-- **Performance Optimization**: Image optimization, caching
-- **Testing**: Unit and integration tests
-- **CI/CD Pipeline**: Automated deployment
-- **Analytics**: User behavior tracking
-- **PWA Features**: Offline functionality
-- **Real-time Updates**: WebSocket integration
+## Deployment
 
-## 🌍 Use Cases
+### Production Deployment
+- **Platform**: Vercel (recommended) or custom VPS
+- **Database**: MongoDB Atlas for production
+- **CDN**: Vercel Edge Network for static assets
+- **Monitoring**: Error tracking and performance monitoring
 
-1. **Home Cooks**: Discover new recipes based on available ingredients
-2. **Food Enthusiasts**: Share culinary creations with community
-3. **Meal Preppers**: Plan and organize weekly meals
-4. **Dietary Restricted**: Find recipes matching dietary needs
-5. **Learning Cooks**: Get guidance through AI chat assistant
-6. **Content Creators**: Build recipe portfolio and following
+### CI/CD Pipeline
+- Automated testing on pull requests
+- Automated deployment on merge to main
+- Environment-specific configurations
+- Database migration scripts
 
-## 🤝 Contributing
+## Contributing Guidelines
 
-We welcome contributions! Areas where you can help:
-- Feature development
-- Bug fixes
-- Documentation improvements
-- UI/UX enhancements
-- Testing
-- Translation
+Refer to CONTRIBUTING.md for:
+- Code style guidelines
+- Commit message conventions
+- Pull request process
+- Issue reporting templates
 
-## 📝 License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License. See LICENSE file for details.
 
-## 👥 Team & Support
+## Support & Contact
 
-For questions, suggestions, or support:
-- Open an issue on GitHub
-- Contact the development team
-- Join our community discussions
+- **Issues**: GitHub Issues for bug reports
+- **Discussions**: GitHub Discussions for questions
+- **Email**: support@foodzilla.app (if applicable)
+- **Documentation**: Full API docs available at /docs
+
+## Acknowledgments
+
+- Hugging Face for AI model infrastructure
+- Next.js team for the excellent framework
+- MongoDB for database solutions
+- Open source community for various tools and libraries
 
 ---
 
-**Built with ❤️ by the Taste Transform Team**
+**Last Updated**: March 9, 2026  
+**Version**: 1.0.0  
+**Status**: Active Development
