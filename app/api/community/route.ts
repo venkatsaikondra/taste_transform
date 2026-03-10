@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { connect } from '@/dbConfig/dbConfig';
 import Recipe from '@/models/recipeModel';
 import Comment from '@/models/commentModel';
+import User from '@/models/userModel';
+import mongoose from 'mongoose';
 
 export async function GET(request: Request) {
   try {
@@ -48,8 +50,18 @@ export async function GET(request: Request) {
       commentsByRecipe[key].push(c);
     }
 
+    const authorIds = [...new Set(rawRecipes.map((r: any) => r.authorId).filter(Boolean))];
+    const userAuthors = await User.find({
+      _id: { $in: authorIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id)) },
+    }).lean();
+    const authorNameById = userAuthors.reduce((acc: Record<string,string>, u: any) => {
+      acc[String(u._id)] = u.username;
+      return acc;
+    }, {});
+
     const recipes = rawRecipes.map((r: any) => ({
       ...r,
+      authorName: authorNameById[r.authorId] || r.authorId || 'anonymous',
       // ← MAP steps → instructions so the frontend PostCard can read it
       instructions: r.steps || r.recipeText || '',
       likesCount: r.likesCount || (Array.isArray(r.likes) ? r.likes.length : 0),
@@ -132,6 +144,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing recipeName' }, { status: 400 });
       }
 
+      const authorUser = await User.findById(userId).select('username');
+      const authorName = authorUser?.username || 'anonymous';
+
       const newRecipe = new Recipe({
         authorId: String(userId),
         recipeName,
@@ -153,6 +168,7 @@ export async function POST(request: Request) {
         recipe: {
           _id: newRecipe._id,
           authorId: newRecipe.authorId,
+          authorName,
           recipeName: newRecipe.recipeName,
           vibe: newRecipe.vibe,
           instructions: instructions || '',   // ← the key fix

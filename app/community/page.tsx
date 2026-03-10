@@ -22,6 +22,7 @@ interface Recipe {
   likesCount: number;
   createdAt: string;
   authorId?: string;
+  authorName?: string;
   parentRecipeId?: string;
   imageUrl?: string;
   comments?: Comment[];
@@ -48,8 +49,9 @@ const SORTS = [
   { value: 'calories_high', label: '🍔 HEAVY' },
 ];
 
+interface UserProfile { _id: string; username: string; email?: string }
+
 const REACTIONS = ['❤️', '🔥', '😍', '👏', '🤤', '⭐'];
-const MOCK_USER_ID = 'user_demo_123';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function timeAgo(date: string) {
@@ -227,22 +229,6 @@ function ReactionBar({ recipeId }: { recipeId: string }) {
   );
 }
 
-// ─── Calorie Meter ────────────────────────────────────────────────────────────
-function CalorieMeter({ calories }: { calories: number }) {
-  const max = 1500;
-  const pct = Math.min(100, (calories / max) * 100);
-  const color = pct < 33 ? '#4ade80' : pct < 66 ? '#facc15' : '#f87171';
-
-  return (
-    <div className={styles.calMeter}>
-      <div className={styles.calMeterBar}>
-        <div className={styles.calMeterFill} style={{ width: `${pct}%`, background: color }} />
-      </div>
-      <span className={styles.calMeterLabel} style={{ color }}>{calories} kcal</span>
-    </div>
-  );
-}
-
 // ─── Comment Section ──────────────────────────────────────────────────────────
 function CommentSection({ recipeId, comments, onAddComment }: {
   recipeId: string;
@@ -348,10 +334,9 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment, isNew }: {
           {recipe.parentRecipeId && <span className={styles.forkedPill}>🍴 forked</span>}
           <span className={styles.postAuthor}>
             <span className={styles.avatarDot} />
-            <strong>@{recipe.authorId || 'anonymous'}</strong>
+            <strong>@{recipe.authorName || recipe.authorId || 'anonymous'}</strong>
           </span>
           <span className={styles.postTime}>{timeAgo(recipe.createdAt)}</span>
-          <CalorieMeter calories={recipe.totalCalories} />
           <button
             className={`${styles.bookmarkBtn} ${bookmarked ? styles.bookmarkActive : ''}`}
             onClick={() => setBookmarked(b => !b)}
@@ -585,6 +570,7 @@ export default function CommunityKitchen() {
   const [forkLoading, setForkLoading] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [postLoading, setPostLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   // Track which recipe IDs were just posted (for slide-down animation)
   const [newRecipeIds, setNewRecipeIds] = useState<Set<string>>(new Set());
@@ -631,6 +617,23 @@ export default function CommunityKitchen() {
   useEffect(() => { fetchRecipes(); }, [fetchRecipes]);
   useEffect(() => { setPage(1); }, [search, activeVibe, sort]);
 
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/users/me');
+        const json = await res.json();
+        if (json?.user) {
+          setCurrentUser({ _id: json.user._id, username: json.user.username, email: json.user.email });
+        }
+      } catch (err) {
+        console.warn('Unable to fetch current user for community', err);
+      }
+    }
+    loadUser();
+  }, []);
+
+  const getCurrentUserId = () => currentUser?._id || '';
+
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -645,10 +648,16 @@ export default function CommunityKitchen() {
     setHearts(prev => [...prev, { id: ++heartId.current, x: rect.left + rect.width / 2, y: rect.top, emoji }]);
 
     try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        showToast('⚠ login required');
+        setHearts(prev => prev.filter(h => h.id !== heartId.current));
+        return;
+      }
       const res  = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'like', recipeId, userId: MOCK_USER_ID }),
+        body: JSON.stringify({ action: 'like', recipeId, userId }),
       });
       const data = await res.json();
       setLikedIds(prev => {
@@ -667,10 +676,15 @@ export default function CommunityKitchen() {
   // ── Comment ───────────────────────────────────────────────────────────────
   const handleComment = async (recipeId: string, text: string) => {
     try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        showToast('⚠ login required');
+        return;
+      }
       const res  = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'comment', recipeId, userId: MOCK_USER_ID, text }),
+        body: JSON.stringify({ action: 'comment', recipeId, userId, text }),
       });
       const data = await res.json();
       if (data.comment) {
@@ -691,10 +705,15 @@ export default function CommunityKitchen() {
     if (!forkTarget) return;
     setForkLoading(true);
     try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        showToast('⚠ login required');
+        return;
+      }
       const res  = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'fork', recipeId: forkTarget._id, userId: MOCK_USER_ID }),
+        body: JSON.stringify({ action: 'fork', recipeId: forkTarget._id, userId }),
       });
       const data = await res.json();
       if (data.forked) {
@@ -712,14 +731,21 @@ export default function CommunityKitchen() {
   const handleNewPost = async (data: { recipeName: string; vibe: string; instructions: string }) => {
     setPostLoading(true);
     try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        showToast('⚠ login required');
+        setPostLoading(false);
+        return;
+      }
+
       const res = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'publish', userId: MOCK_USER_ID, ...data }),
+        body: JSON.stringify({ action: 'publish', userId, ...data }),
       });
       const result = await res.json();
       if (result.recipe) {
-        setRecipes(prev => [result.recipe, ...prev]);
+        setRecipes(prev => [{ ...result.recipe, authorName: currentUser?.username || 'anonymous' }, ...prev]);
         setTotal(t => t + 1);
         setShowNewPost(false);
         // Mark this recipe as newly posted → triggers slide-down animation
