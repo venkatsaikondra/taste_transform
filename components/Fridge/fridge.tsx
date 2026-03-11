@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './fridge.module.css';
 import LoadingScreen from '../Loading/LoadingScreen';
+import KitchenMode from '@/components/KitchenMode/KitchenMode';
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -389,6 +390,7 @@ export default function Fridge() {
   const [videos, setVideos] = useState<VideoResult[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isKitchenMode, setIsKitchenMode] = useState(false);
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
 
@@ -618,6 +620,27 @@ export default function Fridge() {
 
   // ── Determine what items to show ─────────────────────────────────────────────
   const showGlobalSearch = !activeCategory && searchQuery.trim().length > 0;
+
+  const kitchenSteps = React.useMemo(() => {
+    if (!recipeText) return [];
+
+    const lines = recipeText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    const instructionsStart = lines.findIndex(line => /^(instructions|steps)/i.test(line));
+    const rawSteps = instructionsStart >= 0 ? lines.slice(instructionsStart + 1) : lines;
+
+    const parsedSteps = rawSteps
+      .map(line => line.replace(/^(\d+[\.)]?\s*|[-•*]\s*)/, '').trim())
+      .filter(line => line.length > 0 && !/^(ingredients|nutrition|servings|tips|notes)/i.test(line));
+
+    if (parsedSteps.length > 0) return parsedSteps;
+
+    // fallback to full recipe text if structured steps are not found
+    return [recipeText];
+  }, [recipeText]);
 
   return (
     <>
@@ -912,6 +935,15 @@ export default function Fridge() {
                   {saving ? '💾' : saveSuccess ? '✓ Saved' : '💾'}
                 </button>
                 <button
+                  onClick={() => setIsKitchenMode(true)}
+                  className={styles.kitchenModeBtn}
+                  title="Open step-by-step kitchen mode"
+                  style={{ fontSize: '1rem', padding: '0.4rem 0.6rem' }}
+                  disabled={!kitchenSteps.length}
+                >
+                  👩‍🍳(KITCHEN_MODE)
+                </button>
+                <button
                   onClick={() => { setRecipeText(null); setVideos([]); setGenError(null); }}
                   className={styles.closeBtn}
                 >
@@ -983,6 +1015,13 @@ export default function Fridge() {
 
       {genError && (
         <div className={styles.genError}>{genError}</div>
+      )}
+
+      {isKitchenMode && (
+        <KitchenMode
+          steps={kitchenSteps}
+          onClose={() => setIsKitchenMode(false)}
+        />
       )}
     </div>
     </>

@@ -9,76 +9,206 @@
   color: white;
 }
 
+/* ── Header ── */
 .header {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(197, 251, 69, 0.2);
+  gap: 1rem;
 }
 
 .exitBtn {
   background: transparent;
   color: #ff4d4d;
   border: 1px solid #ff4d4d;
-  padding: 5px 15px;
+  padding: 6px 16px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
   cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
 }
 
-.content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.stepCard {
-  background: rgba(255, 255, 255, 0.05);
-  border-left: 5px solid #c5fb45; /* Your accent color */
-  padding: 2.5rem;
-  border-radius: 12px;
-  max-width: 800px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-}
-
-.stepText {
-  font-size: 2rem; /* Large text for readability from a distance */
-  line-height: 1.4;
-}
-
-.controls {
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 1rem;
-  background: rgba(0, 0, 0, 0.8);
-}
-
-.navBtn {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  height: 80px; /* Big touch targets */
-  font-weight: bold;
-}
-
-.voiceBtn {
-  background: #c5fb45;
-  color: black;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.voiceBtn.active {
-  animation: pulse 1.5s infinite;
+.exitBtn:hover {
   background: #ff4d4d;
   color: white;
 }
 
+/* FIX: progressTracker was unstyled */
+.progressTracker {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  flex: 1;
+}
+
+.progressCurrent {
+  color: #c5fb45;
+  font-size: 1.1rem;
+}
+
+.repeatBtn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.repeatBtn:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Content ── */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.stepCard {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 4px solid #c5fb45;
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  max-width: 820px;
+  width: 100%;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.stepNumber {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: #c5fb45;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.stepText {
+  font-size: 2rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Dot indicators ── */
+.dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s, transform 0.2s;
+  display: inline-block;
+}
+
+.dotDone {
+  background: rgba(197, 251, 69, 0.35);
+}
+
+.dotActive {
+  background: #c5fb45;
+  transform: scale(1.35);
+}
+
+/* ── Controls ── */
+.controls {
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  border-top: 1px solid rgba(197, 251, 69, 0.1);
+}
+
+/* FIX: added cursor, border-radius, font, transition, disabled state */
+.navBtn {
+  background: rgba(255, 255, 255, 0.07);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  height: 80px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.navBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* FIX: disabled state was missing entirely */
+.navBtn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Accent tint on the forward button */
+.navBtnNext:not(:disabled) {
+  border-color: rgba(197, 251, 69, 0.3);
+  color: #c5fb45;
+}
+
+.navBtnNext:hover:not(:disabled) {
+  background: rgba(197, 251, 69, 0.08);
+  border-color: rgba(197, 251, 69, 0.5);
+}
+
+/* FIX: added cursor, font, border-radius, font-size */
+.voiceBtn {
+  background: #c5fb45;
+  color: #0a0a0f;
+  border: none;
+  border-radius: 8px;
+  height: 80px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.voiceBtn:hover {
+  background: #d4ff55;
+}
+
+/* FIX: pulse glow color now matches active red background */
+.voiceBtn.active {
+  background: #ff4d4d;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(197, 251, 69, 0.7); }
-  70% { box-shadow: 0 0 0 20px rgba(197, 251, 69, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(197, 251, 69, 0); }
+  0%   { box-shadow: 0 0 0 0   rgba(255, 77, 77, 0.7); }
+  70%  { box-shadow: 0 0 0 18px rgba(255, 77, 77, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(255, 77, 77, 0); }
 }
