@@ -20,11 +20,7 @@ const Page = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchUserData = async () => {
+  const fetchUserData = React.useCallback(async () => {
     try {
       const response = await axios.get("/api/users/me");
       if (response.data.user) {
@@ -32,22 +28,28 @@ const Page = () => {
       } else {
         router.push("/login");
       }
-    } catch (error: any) {
-      console.log(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to load profile";
+      console.log(message);
       toast.error("Failed to load profile");
       router.push("/login");
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
 
   const logOut = async () => {
     try {
       await axios.get("/api/users/logout");
       toast.success("Logout successful");
       router.push("/login");
-    } catch (error: any) {
-      console.log(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Logout failed';
+      console.log(message);
       toast.error("Logout failed");
     }
   };

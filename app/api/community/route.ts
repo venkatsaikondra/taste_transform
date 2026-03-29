@@ -5,16 +5,39 @@ import Comment from '@/models/commentModel';
 import User from '@/models/userModel';
 import mongoose from 'mongoose';
 
+type RecipeDoc = {
+  _id?: unknown;
+  authorId?: unknown;
+  likes?: unknown[];
+  likesCount?: number;
+  steps?: string;
+  recipeText?: string;
+  recipeName?: string;
+  vibe?: string;
+  parentRecipeId?: unknown;
+  createdAt?: unknown;
+};
+
+type CommunityBody = {
+  action?: string;
+  recipeId?: string;
+  userId?: string;
+  text?: string;
+  recipeName?: string;
+  vibe?: string;
+  instructions?: string;
+};
+
 export async function GET(request: Request) {
   try {
     await connect();
 
     const { searchParams } = new URL(request.url);
-    const search  = searchParams.get('search') || '';
-    const vibe    = searchParams.get('vibe') || '';
-    const sort    = searchParams.get('sort') || 'newest';
-    const limit   = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
-    const page    = Math.max(parseInt(searchParams.get('page') || '1'), 1);
+    const search = searchParams.get('search') || '';
+    const vibe = searchParams.get('vibe') || '';
+    const sort = searchParams.get('sort') || 'newest';
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+    const page = Math.max(parseInt(searchParams.get('page') || '1'), 1);
 
     const filter: Record<string, unknown> = { isPublic: true };
     if (search) {
@@ -26,48 +49,55 @@ export async function GET(request: Request) {
     if (vibe && vibe !== 'all') filter.vibe = vibe;
 
     const sortMap: Record<string, Record<string, 1 | -1>> = {
-      newest:        { createdAt: -1 },
-      popular:       { likesCount: -1, createdAt: -1 },
-      calories_low:  { totalCalories: 1 },
+      newest: { createdAt: -1 },
+      popular: { likesCount: -1, createdAt: -1 },
+      calories_low: { totalCalories: 1 },
       calories_high: { totalCalories: -1 },
     };
-    const sortQuery = (sortMap[sort] ?? sortMap.newest) as any;
+    const sortQuery = sortMap[sort] ?? sortMap.newest;
 
     const [rawRecipes, total] = await Promise.all([
       Recipe.find(filter).sort(sortQuery).skip((page - 1) * limit).limit(limit).lean(),
       Recipe.countDocuments(filter),
     ]);
 
-    const recipeIds = rawRecipes.map((r: any) => r._id);
+    const recipeIds = rawRecipes.map((r) => String((r as RecipeDoc)._id));
     const allComments = await Comment.find({ recipeId: { $in: recipeIds } })
       .sort({ createdAt: 1 })
       .lean();
 
-    const commentsByRecipe: Record<string, any[]> = {};
+    const commentsByRecipe: Record<string, unknown[]> = {};
     for (const c of allComments) {
-      const key = String(c.recipeId);
+      const key = String((c as { recipeId?: unknown }).recipeId);
       if (!commentsByRecipe[key]) commentsByRecipe[key] = [];
       commentsByRecipe[key].push(c);
     }
 
-    const authorIds = [...new Set(rawRecipes.map((r: any) => r.authorId).filter(Boolean))];
-    const userAuthors = await User.find({
-      _id: { $in: authorIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id)) },
-    }).lean();
-    const authorNameById = userAuthors.reduce((acc: Record<string,string>, u: any) => {
-      acc[String(u._id)] = u.username;
+    const authorIds = [...new Set(rawRecipes.map((r) => String((r as RecipeDoc).authorId)).filter(Boolean))];
+    const validAuthorIds = authorIds.filter((id) => mongoose.Types.ObjectId.isValid(id));
+    const userAuthors = await User.find({ _id: { $in: validAuthorIds } }).lean();
+
+    const authorNameById = userAuthors.reduce<Record<string, string>>((acc, u) => {
+      const id = String((u as { _id?: unknown })._id);
+      const username = String((u as { username?: unknown }).username || 'anonymous');
+      acc[id] = username;
       return acc;
     }, {});
 
-    const recipes = rawRecipes.map((r: any) => ({
-      ...r,
-      authorName: authorNameById[r.authorId] || r.authorId || 'anonymous',
-      // ← MAP steps → instructions so the frontend PostCard can read it
-      instructions: r.steps || r.recipeText || '',
-      likesCount: r.likesCount || (Array.isArray(r.likes) ? r.likes.length : 0),
-      comments: commentsByRecipe[String(r._id)] || [],
-      commentCount: (commentsByRecipe[String(r._id)] || []).length,
-    }));
+    const recipes = rawRecipes.map((recipe) => {
+      const r = recipe as RecipeDoc;
+      const recipeAuthorId = String(r.authorId || 'anonymous');
+      const allLikes = Array.isArray(r.likes) ? r.likes : [];
+
+      return {
+        ...recipe,
+        authorName: authorNameById[recipeAuthorId] || recipeAuthorId,
+        instructions: r.steps || r.recipeText || '',
+        likesCount: r.likesCount || allLikes.length,
+        comments: commentsByRecipe[String(r._id)] || [],
+        commentCount: (commentsByRecipe[String(r._id)] || []).length,
+      };
+    });
 
     return NextResponse.json({ recipes, total, page, limit });
   } catch (error) {
@@ -79,7 +109,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connect();
-    const body = await request.json();
+    const body = (await request.json()) as CommunityBody;
     const { action, recipeId, userId } = body;
 
     if (!userId) {
@@ -93,11 +123,10 @@ export async function POST(request: Request) {
       if (!recipe) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
 
       const alreadyLiked = recipe.likes?.map(String).includes(String(userId));
-      if (alreadyLiked) {
-        recipe.likes = recipe.likes.filter((id: any) => String(id) !== String(userId));
-      } else {
-        recipe.likes = [...(recipe.likes || []), userId];
-      }
+      const likesList = Array.isArray(recipe.likes) ? recipe.likes : [];
+      recipe.likes = alreadyLiked
+        ? likesList.filter((id: unknown) => String(id) !== String(userId))
+        : [...likesList, userId];
       recipe.likesCount = recipe.likes.length;
       await recipe.save();
 
@@ -107,13 +136,13 @@ export async function POST(request: Request) {
     if (action === 'fork') {
       if (!recipeId) return NextResponse.json({ error: 'Missing recipeId' }, { status: 400 });
 
-      const original = await Recipe.findById(recipeId).lean() as any;
+      const original = (await Recipe.findById(recipeId).lean()) as Record<string, unknown> | null;
       if (!original) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
 
       const forked = await Recipe.create({
         ...original,
         _id: undefined,
-        recipeName: `${original.recipeName} (fork)`,
+        recipeName: `${String(original.recipeName || '')} (fork)`,
         authorId: userId,
         isPublic: false,
         likes: [],
@@ -127,7 +156,7 @@ export async function POST(request: Request) {
     }
 
     if (action === 'comment') {
-      const { text } = body;
+      const text = body.text?.trim();
       if (!recipeId || !text) {
         return NextResponse.json({ error: 'Missing recipeId or text' }, { status: 400 });
       }
@@ -139,7 +168,9 @@ export async function POST(request: Request) {
     }
 
     if (action === 'publish') {
-      const { recipeName, vibe, instructions } = body;
+      const recipeName = body.recipeName?.trim();
+      const vibe = body.vibe;
+      const instructions = body.instructions || '';
       if (!recipeName) {
         return NextResponse.json({ error: 'Missing recipeName' }, { status: 400 });
       }
@@ -151,9 +182,8 @@ export async function POST(request: Request) {
         authorId: String(userId),
         recipeName,
         vibe: vibe || 'cozy',
-        // ← schema field is `steps`, not `instructions`
-        steps: instructions || '',
-        recipeText: instructions || '',
+        steps: instructions,
+        recipeText: instructions,
         ingredients: [],
         totalCalories: 0,
         likes: [],
@@ -163,7 +193,6 @@ export async function POST(request: Request) {
 
       await newRecipe.save();
 
-      // ← explicitly map steps → instructions in the response
       return NextResponse.json({
         recipe: {
           _id: newRecipe._id,
@@ -171,7 +200,7 @@ export async function POST(request: Request) {
           authorName,
           recipeName: newRecipe.recipeName,
           vibe: newRecipe.vibe,
-          instructions: instructions || '',   // ← the key fix
+          instructions,
           ingredients: [],
           totalCalories: 0,
           likes: [],

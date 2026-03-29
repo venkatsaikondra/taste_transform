@@ -10,29 +10,23 @@ export default function LoginPage() {
   const [user, setUser] = useState({ email: "", password: "" })
   const [loading, setLoading] = useState(false)
 
- const onLogin = async (e: React.FormEvent) => {
+ const onLogin = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   try {
     setLoading(true);
-    // Send request (include credentials so browser accepts Set-Cookie)
     const response = await axios.post("/api/users/login", user, { withCredentials: true });
-    
-    // Success feedback
+
     toast.success(`Welcome back, ${response.data.user.username}!`);
-    
-    // Force App Router to revalidate server components (refresh auth state)
     try {
       router.refresh();
-    } catch (e) {
+    } catch {
       // fallback for older Next versions
-      // no-op
     }
 
     const params = new URLSearchParams(window.location.search);
     router.push(params.get('from') || '/');
-  } catch (error: any) {
-    // This catches "User does not exist" or "Invalid password" from the backend
-    const errorMessage = error.response?.data?.error || "Authentication Failed";
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Authentication Failed";
     toast.error(errorMessage);
   } finally {
     setLoading(false);

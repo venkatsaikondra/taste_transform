@@ -3,6 +3,22 @@ import { connect } from '@/dbConfig/dbConfig';
 import Recipe from '@/models/recipeModel';
 import Comment from '@/models/commentModel';
 
+type RecipeDoc = {
+  _id?: unknown;
+  likes?: unknown[];
+  likesCount?: number;
+};
+
+type PublishBody = {
+  action?: string;
+  recipeId?: string;
+  userId?: string;
+  text?: string;
+  recipeName?: string;
+  vibe?: string;
+  instructions?: string;
+};
+
 // GET /api/community?search=&vibe=&sort=newest|popular&limit=20&page=1
 export async function GET(request: Request) {
   try {
@@ -32,7 +48,7 @@ export async function GET(request: Request) {
       calories_low: { totalCalories: 1 },
       calories_high:{ totalCalories: -1 },
     };
-    const sortQuery = (sortMap[sort] ?? sortMap.newest) as any;
+    const sortQuery = sortMap[sort] ?? sortMap.newest;
 
     const [rawRecipes, total] = await Promise.all([
       Recipe.find(filter)
@@ -43,26 +59,28 @@ export async function GET(request: Request) {
       Recipe.countDocuments(filter),
     ]);
 
-    // Attach comments to each recipe
-    const recipeIds = rawRecipes.map((r: any) => r._id);
+    const recipeIds = rawRecipes.map((r) => String((r as RecipeDoc)._id));
     const allComments = await Comment.find({ recipeId: { $in: recipeIds } })
       .sort({ createdAt: 1 })
       .lean();
 
-    // Group comments by recipeId
-    const commentsByRecipe: Record<string, any[]> = {};
+    const commentsByRecipe: Record<string, unknown[]> = {};
     for (const c of allComments) {
-      const key = String(c.recipeId);
+      const key = String((c as { recipeId?: unknown }).recipeId);
       if (!commentsByRecipe[key]) commentsByRecipe[key] = [];
       commentsByRecipe[key].push(c);
     }
 
-    const recipes = rawRecipes.map((r: any) => ({
-      ...r,
-      likesCount:   r.likesCount || (Array.isArray(r.likes) ? r.likes.length : 0),
-      comments:     commentsByRecipe[String(r._id)] || [],
-      commentCount: (commentsByRecipe[String(r._id)] || []).length,
-    }));
+    const recipes = rawRecipes.map((recipe) => {
+      const r = recipe as RecipeDoc;
+      const allLikes = Array.isArray(r.likes) ? r.likes : [];
+      return {
+        ...recipe,
+        likesCount: r.likesCount || allLikes.length,
+        comments: commentsByRecipe[String(r._id)] || [],
+        commentCount: (commentsByRecipe[String(r._id)] || []).length,
+      };
+    });
 
     return NextResponse.json({ recipes, total, page, limit });
   } catch (error) {
@@ -75,8 +93,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connect();
-    const body = await request.json();
-    const { action, recipeId, userId } = body;
+    const body = (await request.json()) as PublishBody;
+    const action = String(body.action || '');
+    const recipeId = String(body.recipeId || '');
+    const userId = String(body.userId || '');
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
@@ -89,12 +109,11 @@ export async function POST(request: Request) {
       const recipe = await Recipe.findById(recipeId);
       if (!recipe) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
 
-      const alreadyLiked = recipe.likes?.map(String).includes(String(userId));
-      if (alreadyLiked) {
-        recipe.likes = recipe.likes.filter((id: any) => String(id) !== String(userId));
-      } else {
-        recipe.likes = [...(recipe.likes || []), userId];
-      }
+      const likesList = Array.isArray(recipe.likes) ? recipe.likes : [];
+      const alreadyLiked = likesList.map(String).includes(String(userId));
+      recipe.likes = alreadyLiked
+        ? likesList.filter((id: unknown) => String(id) !== String(userId))
+        : [...likesList, userId];
       recipe.likesCount = recipe.likes.length;
       await recipe.save();
 
@@ -105,7 +124,7 @@ export async function POST(request: Request) {
     if (action === 'fork') {
       if (!recipeId) return NextResponse.json({ error: 'Missing recipeId' }, { status: 400 });
 
-      const original = await Recipe.findById(recipeId).lean() as any;
+      const original = (await Recipe.findById(recipeId).lean()) as Record<string, unknown> | null;
       if (!original) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
 
       const forked = await Recipe.create({
@@ -126,8 +145,8 @@ export async function POST(request: Request) {
 
     // ── Comment ───────────────────────────────────────────────────────────────
     if (action === 'comment') {
-      const { text } = body;
-      if (!recipeId || !text?.trim()) {
+      const text = String(body.text || '').trim();
+      if (!recipeId || !text) {
         return NextResponse.json({ error: 'Missing recipeId or text' }, { status: 400 });
       }
 
@@ -147,19 +166,21 @@ export async function POST(request: Request) {
 
     // ── Publish (post to community feed) ─────────────────────────────────────
     if (action === 'publish') {
-      const { recipeName, vibe, instructions } = body;
-      if (!recipeName?.trim()) {
+      const recipeName = String(body.recipeName || '').trim();
+      const vibe = String(body.vibe || 'cozy');
+      const instructions = String(body.instructions || '');
+      if (!recipeName) {
         return NextResponse.json({ error: 'Missing recipeName' }, { status: 400 });
       }
 
       const recipe = await Recipe.create({
         authorId:     String(userId),
-        recipeName:   recipeName.trim(),
-        vibe:         vibe || 'cozy',
-        instructions: instructions || '',
+        recipeName,
+        vibe,
+        instructions,
         ingredients:  [],
-        steps:        instructions || '',
-        recipeText:   instructions || '',
+        steps:        instructions,
+        recipeText:   instructions,
         totalCalories: 0,
         isPublic:     true,
         likes:        [],

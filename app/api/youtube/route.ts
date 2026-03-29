@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       {
         params: {
           part: "snippet",
-          q: `${query} recipe tutorial`, // We add "recipe tutorial" to focus results
+          q: `${query} recipe tutorial`,
           maxResults: 3,
           type: "video",
           videoEmbeddable: "true",
@@ -32,8 +32,16 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // 3. Format and return the video data
-    const videos = response.data.items.map((item: any) => ({
+    type YouTubeSearchItem = {
+      id: { videoId: string };
+      snippet: {
+        title: string;
+        thumbnails: { high: { url: string } };
+        channelTitle: string;
+      };
+    };
+
+    const videos = (response.data.items as YouTubeSearchItem[]).map((item) => ({
       videoId: item.id.videoId,
       title: item.snippet.title,
       thumbnail: item.snippet.thumbnails.high.url,
@@ -41,8 +49,9 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json({ success: true, videos });
-  } catch (error: any) {
-    console.error("YouTube API Error:", error.response?.data || error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'YouTube request failed';
+    console.error("YouTube API Error:", message);
     return NextResponse.json(
       { error: "Failed to fetch YouTube recommendations" },
       { status: 500 }

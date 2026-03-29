@@ -11,18 +11,18 @@ export default function Signup() {
   const [buttonDisabled, setButtonDisabled] = useState(true)
   const [loading, setLoading] = useState(false)
 
-  const onSignup = async (e: React.FormEvent) => {
+  const onSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      setLoading(true)
-      await axios.post("/api/users/signup", user)
-      toast.success("Identity Registered Successfully")
-      router.push("/login")
-    } catch (error: any) {
-      const message = error.response?.data?.error || "Registration Failure"
-      toast.error(message)
+      setLoading(true);
+      await axios.post("/api/users/signup", user);
+      toast.success("Identity Registered Successfully");
+      router.push("/login");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Registration Failure";
+      toast.error(message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

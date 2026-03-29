@@ -289,8 +289,8 @@ function ForkModal({ recipe, onConfirm, onClose, loading }: {
         <div className={styles.forkIconBig}>🍴</div>
         <h3 className={styles.forkTitle}>FORK THIS RECIPE?</h3>
         <p className={styles.forkDesc}>
-          Clone <strong>"{recipe.recipeName}"</strong> into your private kitchen.
-          Remix it however you want — it won't affect the original.
+          Clone <strong>&quot;{recipe.recipeName}&quot;</strong> into your private kitchen.
+          Remix it however you want — it won&apos;t affect the original.
         </p>
         <div className={styles.forkActions}>
           <button className={styles.cancelBtn} onClick={onClose}>CANCEL</button>
@@ -312,16 +312,11 @@ function PostCard({ recipe, likedIds, onLike, onFork, onComment, isNew }: {
   onComment: (recipeId: string, text: string) => Promise<void>;
   isNew?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(Boolean(isNew));
   const [showComments, setShowComments] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const liked = likedIds.has(recipe._id);
   const comments = recipe.comments || [];
-
-  // Sync expanded state when isNew becomes true (new post just submitted)
-  useEffect(() => {
-    if (isNew) setExpanded(true);
-  }, [isNew]);
 
   return (
     <article className={`${styles.postCard} ${isNew ? styles.postCardNew : ''}`}>
@@ -662,7 +657,11 @@ export default function CommunityKitchen() {
       const data = await res.json();
       setLikedIds(prev => {
         const next = new Set(prev);
-        data.liked ? next.add(recipeId) : next.delete(recipeId);
+        if (data.liked) {
+          next.add(recipeId);
+        } else {
+          next.delete(recipeId);
+        }
         return next;
       });
       setRecipes(prev =>

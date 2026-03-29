@@ -11,11 +11,7 @@ const Page = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = React.useCallback(async () => {
     try {
       const response = await axios.get('/api/users/me');
       if (response.data.user) {
@@ -24,14 +20,20 @@ const Page = () => {
         toast.error('Please login to access the fridge');
         router.push('/login');
       }
-    } catch (error: any) {
-      console.log(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Please login to access the fridge';
+      console.log(message);
       toast.error('Please login to access the fridge');
       router.push('/login');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
 
   if (loading) {
     return (

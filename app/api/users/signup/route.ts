@@ -31,12 +31,15 @@ export async function POST(request: NextRequest) {
       success: true,
     }, { status: 201 });
 
-  } catch (error: any) {
-    // Catch-all for MongoDB unique errors that might slip through
-    if (error.code === 11000) {
-      return NextResponse.json({ error: "Username or Email already in use" }, { status: 400 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if ((error as { code?: number }).code === 11000) {
+        return NextResponse.json({ error: "Username or Email already in use" }, { status: 400 });
+      }
+      console.error("Signup Error:", error.message);
+    } else {
+      console.error("Signup Error:", error);
     }
-    console.error("Signup Error:", error.message);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
