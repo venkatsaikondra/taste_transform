@@ -24,10 +24,11 @@ export async function GET(request: NextRequest) {
       recipes,
       count: recipes.length,
     });
-  } catch (error: any) {
-    console.error("Error fetching recipes:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Error fetching recipes:", message);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch recipes" },
+      { error: message || "Failed to fetch recipes" },
       { status: 500 }
     );
   }

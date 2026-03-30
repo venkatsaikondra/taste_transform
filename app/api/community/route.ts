@@ -5,6 +5,19 @@ import Comment from '@/models/commentModel';
 import User from '@/models/userModel';
 import mongoose from 'mongoose';
 
+type CommunityRequestBody = {
+  action?: string;
+  recipeId?: string;
+  userId?: string;
+  text?: string;
+  recipeName?: string;
+  vibe?: string;
+  instructions?: string;
+};
+
+type LeanRecord = Record<string, unknown>;
+const toStringOrEmpty = (value: unknown) => (typeof value === 'string' ? value : '');
+
 export async function GET(request: Request) {
   try {
     await connect();
@@ -31,43 +44,53 @@ export async function GET(request: Request) {
       calories_low:  { totalCalories: 1 },
       calories_high: { totalCalories: -1 },
     };
-    const sortQuery = (sortMap[sort] ?? sortMap.newest) as any;
+    const sortQuery = sortMap[sort] || sortMap.newest;
 
     const [rawRecipes, total] = await Promise.all([
-      Recipe.find(filter).sort(sortQuery).skip((page - 1) * limit).limit(limit).lean(),
+      Recipe.find(filter).sort(sortQuery).skip((page - 1) * limit).limit(limit).lean() as Promise<LeanRecord[]>,
       Recipe.countDocuments(filter),
     ]);
 
-    const recipeIds = rawRecipes.map((r: any) => r._id);
+    const recipeIds = rawRecipes.map((recipe) => toStringOrEmpty(recipe._id));
     const allComments = await Comment.find({ recipeId: { $in: recipeIds } })
       .sort({ createdAt: 1 })
-      .lean();
+      .lean() as LeanRecord[];
 
-    const commentsByRecipe: Record<string, any[]> = {};
-    for (const c of allComments) {
-      const key = String(c.recipeId);
+    const commentsByRecipe: Record<string, LeanRecord[]> = {};
+    for (const comment of allComments) {
+      const key = toStringOrEmpty(comment.recipeId);
       if (!commentsByRecipe[key]) commentsByRecipe[key] = [];
-      commentsByRecipe[key].push(c);
+      commentsByRecipe[key].push(comment);
     }
 
-    const authorIds = [...new Set(rawRecipes.map((r: any) => r.authorId).filter(Boolean))];
+    const authorIds = [...new Set(rawRecipes.map((recipe) => toStringOrEmpty(recipe.authorId)).filter(Boolean))];
+    const validAuthorIds = authorIds.filter((id) => mongoose.Types.ObjectId.isValid(id));
     const userAuthors = await User.find({
-      _id: { $in: authorIds.filter((id: string) => mongoose.Types.ObjectId.isValid(id)) },
-    }).lean();
-    const authorNameById = userAuthors.reduce((acc: Record<string,string>, u: any) => {
-      acc[String(u._id)] = u.username;
+      _id: { $in: validAuthorIds },
+    }).lean() as LeanRecord[];
+    const authorNameById = userAuthors.reduce<Record<string, string>>((acc, user) => {
+      const id = toStringOrEmpty(user._id);
+      acc[id] = toStringOrEmpty(user.username) || 'anonymous';
       return acc;
     }, {});
 
-    const recipes = rawRecipes.map((r: any) => ({
-      ...r,
-      authorName: authorNameById[r.authorId] || r.authorId || 'anonymous',
-      // ← MAP steps → instructions so the frontend PostCard can read it
-      instructions: r.steps || r.recipeText || '',
-      likesCount: r.likesCount || (Array.isArray(r.likes) ? r.likes.length : 0),
-      comments: commentsByRecipe[String(r._id)] || [],
-      commentCount: (commentsByRecipe[String(r._id)] || []).length,
-    }));
+    const recipes = rawRecipes.map((recipe) => {
+      const likes = recipe.likes;
+      const likesCount = typeof recipe.likesCount === 'number'
+        ? recipe.likesCount
+        : Array.isArray(likes)
+        ? likes.length
+        : 0;
+
+      return {
+        ...recipe,
+        authorName: authorNameById[toStringOrEmpty(recipe.authorId)] || toStringOrEmpty(recipe.authorId) || 'anonymous',
+        instructions: toStringOrEmpty(recipe.steps) || toStringOrEmpty(recipe.recipeText),
+        likesCount,
+        comments: commentsByRecipe[toStringOrEmpty(recipe._id)] || [],
+        commentCount: (commentsByRecipe[toStringOrEmpty(recipe._id)] || []).length,
+      };
+    });
 
     return NextResponse.json({ recipes, total, page, limit });
   } catch (error) {
@@ -79,7 +102,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connect();
-    const body = await request.json();
+    const body = (await request.json()) as CommunityRequestBody;
     const { action, recipeId, userId } = body;
 
     if (!userId) {
@@ -92,13 +115,12 @@ export async function POST(request: Request) {
       const recipe = await Recipe.findById(recipeId);
       if (!recipe) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
 
-      const alreadyLiked = recipe.likes?.map(String).includes(String(userId));
-      if (alreadyLiked) {
-        recipe.likes = recipe.likes.filter((id: any) => String(id) !== String(userId));
-      } else {
-        recipe.likes = [...(recipe.likes || []), userId];
-      }
-      recipe.likesCount = recipe.likes.length;
+      const currentLikes = Array.isArray(recipe.likes) ? recipe.likes.map(String) : [];
+      const alreadyLiked = currentLikes.includes(String(userId));
+      recipe.likes = alreadyLiked
+        ? currentLikes.filter((id: string) => id !== String(userId))
+        : [...currentLikes, String(userId)];
+      recipe.likesCount = (recipe.likes as string[]).length;
       await recipe.save();
 
       return NextResponse.json({ liked: !alreadyLiked, likesCount: recipe.likesCount });
@@ -107,14 +129,14 @@ export async function POST(request: Request) {
     if (action === 'fork') {
       if (!recipeId) return NextResponse.json({ error: 'Missing recipeId' }, { status: 400 });
 
-      const original = await Recipe.findById(recipeId).lean() as any;
+      const original = await Recipe.findById(recipeId).lean() as LeanRecord | null;
       if (!original) return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
 
       const forked = await Recipe.create({
         ...original,
         _id: undefined,
-        recipeName: `${original.recipeName} (fork)`,
-        authorId: userId,
+        recipeName: `${toStringOrEmpty(original.recipeName)} (fork)`,
+        authorId: String(userId),
         isPublic: false,
         likes: [],
         likesCount: 0,
@@ -127,7 +149,7 @@ export async function POST(request: Request) {
     }
 
     if (action === 'comment') {
-      const { text } = body;
+      const text = toStringOrEmpty(body.text);
       if (!recipeId || !text) {
         return NextResponse.json({ error: 'Missing recipeId or text' }, { status: 400 });
       }
@@ -139,21 +161,22 @@ export async function POST(request: Request) {
     }
 
     if (action === 'publish') {
-      const { recipeName, vibe, instructions } = body;
+      const recipeName = toStringOrEmpty(body.recipeName);
+      const vibe = toStringOrEmpty(body.vibe);
+      const instructions = toStringOrEmpty(body.instructions);
       if (!recipeName) {
         return NextResponse.json({ error: 'Missing recipeName' }, { status: 400 });
       }
 
-      const authorUser = await User.findById(userId).select('username');
+      const authorUser = await User.findById(String(userId)).select('username');
       const authorName = authorUser?.username || 'anonymous';
 
       const newRecipe = new Recipe({
         authorId: String(userId),
         recipeName,
         vibe: vibe || 'cozy',
-        // ← schema field is `steps`, not `instructions`
-        steps: instructions || '',
-        recipeText: instructions || '',
+        steps: instructions,
+        recipeText: instructions,
         ingredients: [],
         totalCalories: 0,
         likes: [],
@@ -163,7 +186,6 @@ export async function POST(request: Request) {
 
       await newRecipe.save();
 
-      // ← explicitly map steps → instructions in the response
       return NextResponse.json({
         recipe: {
           _id: newRecipe._id,
@@ -171,7 +193,7 @@ export async function POST(request: Request) {
           authorName,
           recipeName: newRecipe.recipeName,
           vibe: newRecipe.vibe,
-          instructions: instructions || '',   // ← the key fix
+          instructions,
           ingredients: [],
           totalCalories: 0,
           likes: [],

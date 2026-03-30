@@ -21,33 +21,35 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get("/api/users/me");
-      if (response.data.user) {
-        setUserData(response.data.user);
-      } else {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("/api/users/me");
+        if (response.data.user) {
+          setUserData(response.data.user);
+        } else {
+          router.push("/login");
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.log(message);
+        toast.error("Failed to load profile");
         router.push("/login");
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.log(error.message);
-      toast.error("Failed to load profile");
-      router.push("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchUserData();
+  }, [router]);
 
   const logOut = async () => {
     try {
       await axios.get("/api/users/logout");
       toast.success("Logout successful");
       router.push("/login");
-    } catch (error: any) {
-      console.log(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(message);
       toast.error("Logout failed");
     }
   };

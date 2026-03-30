@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 declare global {
   // Allow caching across module reloads in development
-  // eslint-disable-next-line no-var
   var __mongooseGlobal: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } | undefined;
 }
 

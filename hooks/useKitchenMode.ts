@@ -1,6 +1,16 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+type SpeechRecognitionConstructor = new () => {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult?: (event: unknown) => void;
+  onerror?: (event: unknown) => void;
+  start: () => void;
+  stop: () => void;
+};
+
 export const useKitchenMode = (steps: string[]) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isListening, setIsListening] = useState(false);
@@ -32,13 +42,14 @@ export const useKitchenMode = (steps: string[]) => {
   }, [currentStep]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    let wakeLock: any = null;
+    let wakeLock: { release: () => Promise<void> } | null = null;
     const requestWakeLock = async () => {
       if ('wakeLock' in navigator) {
         try {
-          wakeLock = await (navigator as any).wakeLock.request('screen');
-        } catch (err) {
-          console.warn('Wake Lock request failed:', err);
+          wakeLock = await (navigator as unknown as { wakeLock: { request: (type: string) => Promise<{ release: () => Promise<void> }> } }).wakeLock.request('screen');
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.warn('Wake Lock request failed:', message);
         }
       }
     };
@@ -52,7 +63,8 @@ export const useKitchenMode = (steps: string[]) => {
 
   useEffect(() => {
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      (window as unknown as { SpeechRecognition?: SpeechRecognitionConstructor }).SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: SpeechRecognitionConstructor }).webkitSpeechRecognition;
     if (!SpeechRecognition || !isListening) return;
 
     const recognition = new SpeechRecognition();
@@ -60,10 +72,13 @@ export const useKitchenMode = (steps: string[]) => {
     recognition.interimResults = false;
     recognition.lang = 'en-US';
 
-    recognition.onresult = (event: any) => {
-      const result = event.results[event.results.length - 1];
+    recognition.onresult = (event: unknown) => {
+      const eventRecord = event as { results?: ArrayLike<unknown> };
+      const results = eventRecord.results;
+      if (!results || results.length === 0) return;
+      const result = results[results.length - 1] as { isFinal?: boolean; [index: number]: { transcript?: unknown } };
       if (!result.isFinal) return;
-      const transcript = String(result[0].transcript).toLowerCase();
+      const transcript = String(result[0]?.transcript ?? '').toLowerCase();
 
       // Use ref so these always read the current step without restarting recognition
       if (transcript.includes('next')) {
@@ -82,8 +97,10 @@ export const useKitchenMode = (steps: string[]) => {
       }
     };
 
-    recognition.onerror = (event: any) => {
-      console.warn('Voice control error:', event.error);
+    recognition.onerror = (event: unknown) => {
+      const errorEvent = event as { error?: unknown };
+      const message = typeof errorEvent.error === 'string' ? errorEvent.error : String(errorEvent.error ?? 'Unknown voice control error');
+      console.warn('Voice control error:', message);
     };
 
     try {
@@ -95,9 +112,11 @@ export const useKitchenMode = (steps: string[]) => {
     return () => {
       try {
         recognition.stop();
-      } catch (_) {}
+      } catch {
+        // Ignore stop errors when recognition is already stopped
+      }
     };
-  }, [isListening]); // No longer depends on currentStep — ref handles that
+  }, [isListening, readStep, steps.length]);
 
   // Navigation: just update state; the useEffect above handles reading
   const handleNext = useCallback(() => {

@@ -30,9 +30,11 @@ export default function LoginPage() {
 
     const params = new URLSearchParams(window.location.search);
     router.push(params.get('from') || '/');
-  } catch (error: any) {
+  } catch (error: unknown) {
     // This catches "User does not exist" or "Invalid password" from the backend
-    const errorMessage = error.response?.data?.error || "Authentication Failed";
+    const errorMessage = typeof error === 'object' && error !== null && 'response' in error
+      ? ((error as { response?: { data?: { error?: string } } }).response?.data?.error ?? "Authentication Failed")
+      : "Authentication Failed";
     toast.error(errorMessage);
   } finally {
     setLoading(false);

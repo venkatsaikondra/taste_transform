@@ -12,26 +12,27 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const response = await axios.get('/api/users/me');
-      if (response.data.user) {
-        setIsAuthenticated(true);
-      } else {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/api/users/me');
+        if (response.data.user) {
+          setIsAuthenticated(true);
+        } else {
+          toast.error('Please login to access the fridge');
+          router.push('/login');
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.log(message);
         toast.error('Please login to access the fridge');
         router.push('/login');
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.log(error.message);
-      toast.error('Please login to access the fridge');
-      router.push('/login');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    checkAuth();
+  }, [router]);
 
   if (loading) {
     return (

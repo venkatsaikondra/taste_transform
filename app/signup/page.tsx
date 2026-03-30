@@ -18,8 +18,10 @@ export default function Signup() {
       await axios.post("/api/users/signup", user)
       toast.success("Identity Registered Successfully")
       router.push("/login")
-    } catch (error: any) {
-      const message = error.response?.data?.error || "Registration Failure"
+    } catch (error: unknown) {
+      const message = typeof error === 'object' && error !== null && 'response' in error
+        ? ((error as { response?: { data?: { error?: string } } }).response?.data?.error ?? "Registration Failure")
+        : "Registration Failure";
       toast.error(message)
     } finally {
       setLoading(false)

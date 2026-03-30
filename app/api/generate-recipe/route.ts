@@ -22,7 +22,12 @@ export async function POST(req: Request) {
       }
     ];
 
-    const parseErrorMsg = (err: any) => String(err?.message || err || '').toLowerCase();
+    const parseErrorMsg = (err: unknown) => {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        return String((err as { message?: unknown }).message || '').toLowerCase();
+      }
+      return String(err ?? '').toLowerCase();
+    };
     const isAuthError = (msg: string) => /\b(invalid username|invalid password|401|unauthorized|bad credentials)\b/i.test(msg);
 
     const keys = parseHfApiKeys();
@@ -32,8 +37,8 @@ export async function POST(req: Request) {
       }, { status: 500 });
     }
 
-    let response: any = null;
-    let lastError: any = null;
+    let response: unknown = null;
+    let lastError: unknown = null;
 
     for (const key of keys) {
       let client;
@@ -94,23 +99,27 @@ export async function POST(req: Request) {
       }, { status: 503 });
     }
 
-    const recipeOutput = response.choices?.[0]?.message?.content;
+    const responseData = response as { choices?: Array<{ message?: { content?: unknown } }> };
+    const recipeOutput = typeof responseData.choices?.[0]?.message?.content === 'string'
+      ? responseData.choices[0].message?.content
+      : '';
     if (!recipeOutput) {
       return NextResponse.json({ error: 'AI Chef returned no recipe text.' }, { status: 502 });
     }
 
     return NextResponse.json({ recipe: recipeOutput });
 
-  } catch (err: any) {
-    console.error('Error in generate-recipe route:', err?.message || err);
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('Error in generate-recipe route:', errorMsg);
 
-    if (/\b(invalid username|invalid password|401|unauthorized|bad credentials)\b/i.test(err?.message || '')) {
+    if (/\b(invalid username|invalid password|401|unauthorized|bad credentials)\b/i.test(errorMsg)) {
       return NextResponse.json({
         error: 'Hugging Face auth failed: check HF_API_KEY in your .env.local and that it is a valid token.',
       }, { status: 401 });
     }
 
-    if (/HF_API_KEY is not defined/.test(err?.message || '')) {
+    if (/HF_API_KEY is not defined/.test(errorMsg)) {
       return NextResponse.json({
         error: 'HF_API_KEY not set. Add `HF_API_KEY=your_token` to .env.local in project root.',
       }, { status: 500 });

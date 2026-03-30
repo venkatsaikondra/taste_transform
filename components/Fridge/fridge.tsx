@@ -474,7 +474,7 @@ export default function Fridge() {
     const formatted: Array<{ type: 'header' | 'list' | 'text'; content: string }> = [];
     const lines = text.split('\n');
     
-    for (let line of lines) {
+    for (const line of lines) {
       let cleaned = line.trim();
       if (!cleaned) continue;
       
@@ -973,6 +973,7 @@ export default function Fridge() {
                     rel="noopener noreferrer"
                     className={styles.videoCard}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={vid.thumbnail} alt={vid.title} />
                     <p>{vid.title}</p>
                     <span className={styles.watchBadge}>▶ WATCH_TUTORIAL</span>

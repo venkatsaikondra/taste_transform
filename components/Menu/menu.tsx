@@ -103,7 +103,6 @@ export default Menu;*/
 import React, { useRef } from 'react'
 import Styles from './menu.module.css'
 import Link from 'next/link'
-import Lottie from 'lottie-react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'

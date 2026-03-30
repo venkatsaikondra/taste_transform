@@ -14,13 +14,13 @@ export function signToken(payload: object) {
   return jwt.sign(payload, TOKEN_SECRET, { expiresIn: '1d' });
 }
 
-export function verifyToken(token: string) {
+export function verifyToken(token: string): { id?: string } | null {
   if (!TOKEN_SECRET) {
     throw new Error('CRITICAL: TOKEN_SECRET is missing from environment variables.');
   }
   try {
-    return jwt.verify(token, TOKEN_SECRET) as any;
-  } catch (error) {
+    return jwt.verify(token, TOKEN_SECRET) as { id?: string };
+  } catch {
     return null; // Return null on invalid tokens for easier handling in middleware
   }
 }

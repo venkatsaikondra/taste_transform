@@ -24,19 +24,20 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcryptjs.hash(password, salt);
 
     const newUser = new User({ username, email, password: hashedPassword });
-    const savedUser = await newUser.save();
+    await newUser.save();
 
     return NextResponse.json({
       message: "User created successfully",
       success: true,
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Catch-all for MongoDB unique errors that might slip through
-    if (error.code === 11000) {
+    if (typeof error === 'object' && error !== null && 'code' in error && (error as Record<string, unknown>).code === 11000) {
       return NextResponse.json({ error: "Username or Email already in use" }, { status: 400 });
     }
-    console.error("Signup Error:", error.message);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Signup Error:", message);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

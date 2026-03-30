@@ -37,7 +37,7 @@ export default function About() {
           </div>
 
           <h2 className={styles.label}>THE MISSION</h2>
-          <h3 className={styles.title}>Ending "Kitchen Confusion" with LLMs.</h3>
+          <h3 className={styles.title}>Ending &quot;Kitchen Confusion&quot; with LLMs.</h3>
           
           <p className={styles.description}>
            Foodzilla solves a common kitchen problem — having a fridge full of random ingredients but not knowing what to cook. Using Large Language Models (LLMs), Foodzilla helps turn those unused ingredients into tasty meal ideas instead of letting them go to waste.
@@ -69,7 +69,7 @@ export default function About() {
               <span className={styles.pointNumber}>03</span>
               <div>
                 <strong>Instant Recipe Planning</strong>
-                <p>From "I have nothing to eat" into a complete recipe in just a few seconds.</p>
+                <p>From &quot;I have nothing to eat&quot; into a complete recipe in just a few seconds.</p>
               </div>
             </li>
             
