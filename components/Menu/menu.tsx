@@ -140,6 +140,7 @@ const Menu = () => {
         
 
             <div className={Styles.menu_controls}>
+                <Link href="/predict" className={Styles.nav_link}>VISION</Link>
                 <Link href="/dashboard" className={Styles.nav_link}>DASHBOARD</Link>
                 <Link href="/community" className={Styles.nav_link}>COMMUNITY</Link>
                 <Link href="/fridge" className={Styles.cta_button}>OPEN FRIDGE</Link>
