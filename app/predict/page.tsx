@@ -14,7 +14,7 @@ export default function DishPredictor() {
       img.src = base64;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
+        const MAX_WIDTH = 700; 
         let width = img.width;
         let height = img.height;
 
@@ -27,7 +27,7 @@ export default function DishPredictor() {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
       };
     });
   };
@@ -36,26 +36,29 @@ export default function DishPredictor() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setLoading(true);
     const reader = new FileReader();
+
     reader.onloadend = async () => {
-      const base64 = reader.result as string;
-      setLoading(true);
-      
       try {
-        const compressed = await compressImage(base64);
-        setPreview(compressed);
+        const originalBase64 = reader.result as string;
+        const compressedBase64 = await compressImage(originalBase64);
+        setPreview(compressedBase64);
 
         const res = await fetch('/api/vision', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: compressed, mimeType: file.type || 'image/jpeg' }),
+          body: JSON.stringify({ 
+            image: compressedBase64, // FIXED: was 'compressed'
+          }),
         });
+
         const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        if (!res.ok) throw new Error(data.error || 'ANALYSIS_FAILED');
+
         setPrediction(data);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        alert(`SCAN_ERROR: ${message}`);
+      } catch (err: any) {
+        alert(`SCAN_ERROR: ${err.message}`);
         console.error('[predict page]', err);
       } finally {
         setLoading(false);
@@ -70,7 +73,7 @@ export default function DishPredictor() {
       
       <div className={styles.scanHeader}>
         <h1 className={styles.glitchTitle}>REVERSE_ENGINEER.EXE</h1>
-        <p className={styles.terminalText}>SYSTEM_STATUS: {loading ? 'SCANNING...' : 'AWAITING_INPUT'}</p>
+        <p className={styles.terminalText}>SYSTEM_STATUS: {loading ? 'SCANNING_MOLECULES...' : 'AWAITING_INPUT'}</p>
       </div>
 
       <div className={`${styles.uploadBox} ${preview ? styles.hasPreview : ''}`}>
@@ -81,7 +84,7 @@ export default function DishPredictor() {
             <input type="file" accept="image/*" onChange={handleImageUpload} id="dish-upload" hidden />
             <label htmlFor="dish-upload" className={styles.uploadLabel}>
               <span className={styles.uploadIcon}>📷</span>
-              UPLOAD_DISH_FOR_MOLECULAR_ANALYSIS
+              UPLOAD_DISH_FOR_ANALYSIS
             </label>
           </>
         )}
@@ -94,9 +97,7 @@ export default function DishPredictor() {
 
       {prediction && (
         <div className={styles.resultCard}>
-          <div className={styles.cardGlow}></div>
           <h2 className={styles.dishName}>[IDENTIFIED]: {prediction.dishName.toUpperCase()}</h2>
-          
           <div className={styles.ingredientList}>
             {prediction.ingredients.map((ing, i) => (
               <div key={i} className={styles.ingTag}>
@@ -104,7 +105,6 @@ export default function DishPredictor() {
               </div>
             ))}
           </div>
-          
           <button className={styles.pantryBtn}>IMPORT_TO_MY_PANTRY</button>
         </div>
       )}

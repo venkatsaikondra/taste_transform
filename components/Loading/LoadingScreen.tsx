@@ -20,7 +20,7 @@ export default function LoadingScreen({ isVisible }: LoadingScreenProps) {
           playsInline
           className={styles.loadingVideo}
         >
-          <source src="Animations/fridge_removed_marker.mp4" type="video/mp4" />
+          <source src="/Animations/fridge_removed_marker.mp4" type="video/mp4" />
         </video>
         
         {/* Futuristic Loading Text */}
