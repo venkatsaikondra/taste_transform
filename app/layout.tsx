@@ -31,6 +31,12 @@ export const metadata: Metadata = {
   title: "FOODZILLA",
   description: "Taste & Transformer",
 };
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: {

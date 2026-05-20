@@ -1,15 +1,14 @@
 import React from 'react'
 import About from '@/components/About/about'
 import Main from '@/components/Main/main'
-import Menu from '@/components/Menu/menu'
-const page = () => {
+
+const Page = () => {
   return (
-    <div>
-      <Menu/>
-      <Main/>
-      <About/>
-    </div>
+    <main>
+      <Main />
+      <About />
+    </main>
   )
 }
 
-export default page
+export default Page

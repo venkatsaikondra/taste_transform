@@ -305,3 +305,31 @@
 .cta_button:hover {
   transform: scale(1.05);
 }
+
+@media (max-width: 900px) {
+  .menu_bar {
+    padding: 1rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .menu_controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .nav_link,
+  .cta_button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .profile_icon {
+    width: 34px;
+    height: 34px;
+  }
+}
