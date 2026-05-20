@@ -673,6 +673,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(197, 251, 69, 0.15);
@@ -776,6 +777,32 @@
   background: rgba(34, 197, 94, 0.2) !important;
   color: #22c55e !important;
   border-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+.actionGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.downloadBtnSmall {
+  background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.downloadBtnSmall:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+}
+.downloadBtnSmall:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .kitchenModeBtn {

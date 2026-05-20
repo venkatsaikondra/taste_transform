@@ -386,6 +386,8 @@ export default function Fridge() {
   const [videos, setVideos] = useState<VideoResult[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [recipeImageUrl, setRecipeImageUrl] = useState<string | null>(null);
   const [isKitchenMode, setIsKitchenMode] = useState(false);
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
@@ -521,7 +523,12 @@ export default function Fridge() {
       const data = await res.json();
 
       if (!res.ok) {
-        setGenError(data?.error || 'Failed to generate recipe. Please try again.');
+        const errorText = data?.error || 'Failed to generate recipe. Please try again.';
+        if (res.status === 403) {
+          setGenError('Free usage limit reached');
+        } else {
+          setGenError(errorText);
+        }
         return;
       }
 
@@ -589,6 +596,119 @@ export default function Fridge() {
       setSaving(false);
     }
   }
+
+  async function downloadRecipePdf() {
+    if (!recipeText) return;
+    setDownloading(true);
+
+    try {
+      const payload = buildRecipePayload(recipeText);
+      const response = await fetch('/api/recipes/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          recipeImageUrl: recipeImageUrl || null,
+          recipeText,
+          totalCalories: totalCal,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'PDF generation failed' }));
+        console.error('PDF download error:', errorData.error);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${slugifyFileName(payload.recipeName)}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  const buildRecipePayload = (text: string) => {
+    const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+    const inferredTitle = lines[0]?.replace(/^(recipe name|recipe)\s*[:\-]\s*/i, '').trim() || 'Untitled Recipe';
+    const recipeName = /^(ingredients|instructions|steps)/i.test(inferredTitle)
+      ? 'Untitled Recipe'
+      : inferredTitle;
+
+    let section: 'ingredients' | 'instructions' | 'nutrition' | 'other' | null = null;
+    const ingredients: string[] = [];
+    const instructions: string[] = [];
+    const nutritionInfo: string[] = [];
+    let cookingTime = '';
+    const fallback: string[] = [];
+
+    for (const rawLine of lines) {
+      const line = rawLine.replace(/^[-•*]\s*/, '').trim();
+      if (!line) continue;
+
+      if (/^(recipe name|recipe)[:\-]/i.test(rawLine)) {
+        section = null;
+        continue;
+      }
+      if (/^(ingredients|what you need|shopping list)/i.test(line)) {
+        section = 'ingredients';
+        continue;
+      }
+      if (/^(instructions|directions|steps|method)/i.test(line)) {
+        section = 'instructions';
+        continue;
+      }
+      if (/^(nutrition|nutrition info|nutrition facts|nutritional)/i.test(line)) {
+        section = 'nutrition';
+        continue;
+      }
+      if (/^(servings|yield|tips|notes|variations)/i.test(line)) {
+        section = 'other';
+        continue;
+      }
+      if (/^(cooking time|cook time|ready in|total time|prep time)[:\-]/i.test(line)) {
+        cookingTime = line.replace(/^(cooking time|cook time|ready in|total time|prep time)[:\-]\s*/i, '').trim();
+        continue;
+      }
+      if (!cookingTime && /(min|mins|minutes|hour|hours|hrs|h)\b/i.test(line) && /(cook|time|ready)/i.test(line)) {
+        cookingTime = line;
+        continue;
+      }
+
+      if (section === 'ingredients') {
+        ingredients.push(line);
+      } else if (section === 'instructions') {
+        instructions.push(line.replace(/^\d+[\.\)]?\s*/, ''));
+      } else if (section === 'nutrition') {
+        nutritionInfo.push(line);
+      } else {
+        fallback.push(line);
+      }
+    }
+
+    return {
+      recipeName,
+      ingredients,
+      instructions,
+      nutritionInfo,
+      cookingTime,
+      fallbackText: fallback,
+    };
+  };
+
+  const slugifyFileName = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'recipe';
 
   // ── Handle category toggle + clear search ───────────────────────────────────
   const handleCategoryClick = (catId: string) => {
@@ -895,7 +1015,7 @@ export default function Fridge() {
           <div className={styles.recipeCard}>
             <div className={styles.recipeHeader}>
               <h2 className={styles.glowText}>GENERATED_RECIPE.exe</h2>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div className={styles.actionGroup}>
                 <button 
                   onClick={saveRecipe} 
                   className={`${styles.saveBtnSmall} ${saveSuccess ? styles.saveBtnSuccess : ''}`}
@@ -904,6 +1024,15 @@ export default function Fridge() {
                   style={{ fontSize: '1rem', padding: '0.4rem 0.6rem' }}
                 >
                   {saving ? '💾' : saveSuccess ? '✓ Saved' : '💾'}
+                </button>
+                <button
+                  onClick={downloadRecipePdf}
+                  className={styles.downloadBtnSmall}
+                  disabled={downloading || !recipeText}
+                  title="Download recipe as PDF"
+                  style={{ fontSize: '1rem', padding: '0.4rem 0.6rem' }}
+                >
+                  {downloading ? 'Downloading…' : 'Download PDF'}
                 </button>
                 <button
                   onClick={() => setIsKitchenMode(true)}

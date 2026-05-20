@@ -61,7 +61,7 @@ export function middleware(req: NextRequest) {
     pathname.startsWith('/_next') || 
     pathname.startsWith('/Animations') || // Path for your fridge video
     pathname.includes('.') || 
-    pathname.startsWith('/api')
+    (pathname.startsWith('/api') && pathname !== '/api/generate-recipe')
   ) {
     return NextResponse.next();
   }
@@ -72,7 +72,19 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Robust Token Check
+  // 4. Protect /api/generate-recipe from unauthenticated access
+  if (pathname === '/api/generate-recipe') {
+    const apiToken = req.cookies.get('token')?.value;
+    if (!apiToken) {
+      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+    return NextResponse.next();
+  }
+
+  // 5. Robust Token Check
   // We check for the token; if it's missing on a private route, we redirect.
   const token = req.cookies.get('token')?.value;
 
@@ -88,7 +100,7 @@ export function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-// 5. Improved Matcher
+// 6. Improved Matcher
 // This ensures the middleware ignores static files entirely for better performance
 export const config = {
   matcher: [

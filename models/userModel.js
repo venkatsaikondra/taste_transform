@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
     forgotPasswordTokenExpiry: Date,
     verifyToken: String,
     verifyTokenExpiry: Date,
+    generationCount: {
+      type: Number,
+      default: 0,
+    },
     recipes: [
       {
         type: mongoose.Schema.Types.ObjectId,

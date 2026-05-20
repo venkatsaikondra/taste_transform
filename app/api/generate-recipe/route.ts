@@ -1,8 +1,24 @@
 import { createHfClient, parseHfApiKeys } from "@/lib/huggingface";
-import { NextResponse } from "next/server";
+import { connect } from "@/dbConfig/dbConfig";
+import { getUserFromToken } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+const FREE_GENERATION_LIMIT = 3;
+
+export async function POST(req: NextRequest) {
   try {
+    await connect();
+
+    const user = await getUserFromToken(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const currentCount = user.generationCount ?? 0;
+    if (currentCount >= FREE_GENERATION_LIMIT) {
+      return NextResponse.json({ error: 'Free usage limit reached' }, { status: 403 });
+    }
+
     const body = await req.json();
     const { ingredients, vibe } = body;
 
@@ -106,6 +122,8 @@ export async function POST(req: Request) {
     if (!recipeOutput) {
       return NextResponse.json({ error: 'AI Chef returned no recipe text.' }, { status: 502 });
     }
+
+    await user.updateOne({ $inc: { generationCount: 1 } });
 
     return NextResponse.json({ recipe: recipeOutput });
 
