@@ -10,6 +10,7 @@ const Page = () => {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<null | { username: string; generationCount?: number }>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -17,6 +18,7 @@ const Page = () => {
         const response = await axios.get('/api/users/me');
         if (response.data.user) {
           setIsAuthenticated(true);
+          setUser(response.data.user);
         } else {
           toast.error('Please login to access the fridge');
           router.push('/login');
@@ -55,7 +57,7 @@ const Page = () => {
     return null;
   }
 
-  return <Fridge />;
+  return <Fridge user={user} />;
 };
 
 export default Page;

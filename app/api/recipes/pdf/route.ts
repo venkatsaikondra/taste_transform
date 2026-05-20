@@ -170,8 +170,8 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '') || 'recipe';
 
-    const body = Buffer.from(pdfBytes);
-    return new Response(body, {
+    const pdfBuffer = Buffer.from(pdfBytes);
+    return new Response(pdfBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

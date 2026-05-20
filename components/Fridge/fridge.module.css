@@ -412,6 +412,33 @@
   font-size: 0.75rem;
   color: #64748b;
 }
+.usageInfo {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 999px;
+  color: #e2e8f0;
+  font-size: 0.78rem;
+}
+.usageCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.85);
+  color: #0f172a;
+  font-weight: 700;
+}
+.usageLabel {
+  color: #cbd5e1;
+  letter-spacing: 0.01em;
+}
 
 /* ── Cart Items ───────────────────────────────────────────────────────────── */
 .cartItems {

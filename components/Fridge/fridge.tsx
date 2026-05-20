@@ -3,6 +3,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import styles from './fridge.module.css';
 import LoadingScreen from '../Loading/LoadingScreen';
 import KitchenMode from '@/components/KitchenMode/KitchenMode';
+
+interface FridgeProps {
+  user?: {
+    username: string;
+    generationCount?: number;
+  } | null;
+}
+
+const FREE_GENERATION_LIMIT = 3;
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -366,7 +376,7 @@ function Particle({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function Fridge() {
+export default function Fridge({ user }: FridgeProps) {
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -389,10 +399,17 @@ export default function Fridge() {
   const [downloading, setDownloading] = useState(false);
   const [recipeImageUrl, setRecipeImageUrl] = useState<string | null>(null);
   const [isKitchenMode, setIsKitchenMode] = useState(false);
+  const [remainingUses, setRemainingUses] = useState<number | null>(null);
 
   const currentCategory = CATEGORIES.find(c => c.id === activeCategory);
 
   const [isAppLoading, setIsAppLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      setRemainingUses(Math.max(FREE_GENERATION_LIMIT - (user.generationCount ?? 0), 0));
+    }
+  }, [user]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsAppLoading(false), 2500);
@@ -533,6 +550,7 @@ export default function Fridge() {
       }
 
       setRecipeText(data.recipe ?? JSON.stringify(data));
+      setRemainingUses(prev => (prev !== null ? Math.max(prev - 1, 0) : prev));
 
       setTimeout(() => {
         generationRef.current?.scrollIntoView({
@@ -937,6 +955,12 @@ export default function Fridge() {
                   ? 'Empty — add ingredients!'
                   : `${totalItems} item${totalItems !== 1 ? 's' : ''} · ${totalCal} kcal`}
               </p>
+              {remainingUses !== null && (
+                <div className={styles.usageInfo}>
+                  <span className={styles.usageCount}>{remainingUses}</span>
+                  <span className={styles.usageLabel}>free recipes left</span>
+                </div>
+              )}
             </div>
           </div>
 
