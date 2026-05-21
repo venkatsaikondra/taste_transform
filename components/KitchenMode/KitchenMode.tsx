@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import styles from './kitchen.module.css';
 import { useKitchenMode } from '@/hooks/useKitchenMode';
