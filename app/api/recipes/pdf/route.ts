@@ -200,7 +200,8 @@ export async function POST(request: NextRequest) {
     const safeFilename = recipeName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'recipe';
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 80) || 'recipe';
 
     const pdfBuffer = Buffer.from(pdfBytes);
     return new Response(pdfBuffer, {

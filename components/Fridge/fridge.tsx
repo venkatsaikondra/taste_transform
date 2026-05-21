@@ -656,10 +656,11 @@ export default function Fridge({ user }: FridgeProps) {
 
   const buildRecipePayload = (text: string) => {
     const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
-    const inferredTitle = lines[0]?.replace(/^(recipe name|recipe)\s*[:\-]\s*/i, '').trim() || 'Untitled Recipe';
-    const recipeName = /^(ingredients|instructions|steps)/i.test(inferredTitle)
-      ? 'Untitled Recipe'
-      : inferredTitle;
+    const titleLine = lines.find(line => /^(recipe name|recipe title|title|recipe)\s*[:\-]/i.test(line));
+    const inferredTitle = titleLine
+      ? titleLine.replace(/^(recipe name|recipe title|title|recipe)\s*[:\-]\s*/i, '').trim()
+      : 'Untitled Recipe';
+    const recipeName = inferredTitle && inferredTitle.length <= 80 ? inferredTitle : 'Untitled Recipe';
 
     let section: 'ingredients' | 'instructions' | 'nutrition' | 'other' | null = null;
     const ingredients: string[] = [];
@@ -722,11 +723,21 @@ export default function Fridge({ user }: FridgeProps) {
     };
   };
 
-  const slugifyFileName = (value: string) =>
-    value
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'recipe';
+  const slugifyFileName = (value: string) => {
+    const shortValue = value
+      .split(/\s+/)
+      .slice(0, 6)
+      .join(' ')
+      .trim();
+
+    return (
+      shortValue
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 80) || 'recipe'
+    );
+  };
 
   // ── Handle category toggle + clear search ───────────────────────────────────
   const handleCategoryClick = (catId: string) => {
