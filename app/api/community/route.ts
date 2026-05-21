@@ -16,7 +16,11 @@ type CommunityRequestBody = {
 };
 
 type LeanRecord = Record<string, unknown>;
-const toStringOrEmpty = (value: unknown) => (typeof value === 'string' ? value : '');
+const toStringOrEmpty = (value: unknown) => {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  return String(value);
+};
 
 export async function GET(request: Request) {
   try {
@@ -51,10 +55,15 @@ export async function GET(request: Request) {
       Recipe.countDocuments(filter),
     ]);
 
-    const recipeIds = rawRecipes.map((recipe) => toStringOrEmpty(recipe._id));
-    const allComments = await Comment.find({ recipeId: { $in: recipeIds } })
-      .sort({ createdAt: 1 })
-      .lean() as LeanRecord[];
+    const recipeIds = rawRecipes
+      .map((recipe) => toStringOrEmpty(recipe._id))
+      .filter((id) => id.length === 24);
+
+    const allComments = recipeIds.length > 0
+      ? await Comment.find({ recipeId: { $in: recipeIds } })
+          .sort({ createdAt: 1 })
+          .lean() as LeanRecord[]
+      : [];
 
     const commentsByRecipe: Record<string, LeanRecord[]> = {};
     for (const comment of allComments) {

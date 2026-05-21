@@ -613,6 +613,14 @@ export default function CommunityKitchen() {
   useEffect(() => { setPage(1); }, [search, activeVibe, sort]);
 
   useEffect(() => {
+    const handleFocus = () => {
+      fetchRecipes();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchRecipes]);
+
+  useEffect(() => {
     async function loadUser() {
       try {
         const res = await fetch('/api/users/me');
@@ -750,6 +758,7 @@ export default function CommunityKitchen() {
         // Mark this recipe as newly posted → triggers slide-down animation
         setNewRecipeIds(prev => new Set(prev).add(result.recipe._id));
         showToast('🍽 posted to community!');
+        await fetchRecipes();
       }
     } catch {
       showToast('❌ post failed');
