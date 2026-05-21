@@ -18,14 +18,32 @@ export const useKitchenMode = (steps: string[]) => {
   const currentStepRef = useRef(currentStep);
 
   const readStep = useCallback((index: number) => {
-    if (typeof window !== 'undefined' && window.speechSynthesis && steps?.[index]) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(steps[index]);
-      utterance.rate = 0.95;
-      utterance.pitch = 1;
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+    if (typeof window === 'undefined') return;
+    if (!steps || typeof index !== 'number' || index < 0 || index >= steps.length) return;
+    if (!window.speechSynthesis) return;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(steps[index]);
+    // Slightly slower, warm pitch for a clean, sweet voice
+    utterance.rate = 0.98;
+    utterance.pitch = 1.12;
+    utterance.volume = 1;
+    utterance.lang = 'en-US';
+
+    // Try to pick a pleasant female/soft English voice when available
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      const preferred = voices.find(v => /Samantha|Karen|Zira|Victoria|Allison|Serena|Google UK English Female|Nora|Amelia|Sofie/i.test(v.name));
+      const enVoice = voices.find(v => /^en/.test(v.lang));
+      if (preferred) utterance.voice = preferred;
+      else if (enVoice) utterance.voice = enVoice;
+      else if (voices.length) utterance.voice = voices[0];
+    } catch (e) {
+      // ignore voice selection failures; fallback to default
     }
+
+    window.speechSynthesis.speak(utterance);
+    return;
   }, [steps]);
 
   // Keep ref in sync, and auto-read only on step change (not on mount side-effects)
@@ -40,6 +58,14 @@ export const useKitchenMode = (steps: string[]) => {
     // Only fires when step actually changes (not from handleNext/Prev calling readStep)
     readStep(currentStep);
   }, [currentStep]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // If the steps array changes, ensure currentStep is within bounds
+  useEffect(() => {
+    setCurrentStep(prev => {
+      if (!steps || steps.length === 0) return 0;
+      return Math.min(prev, Math.max(0, steps.length - 1));
+    });
+  }, [steps.length]);
 
   useEffect(() => {
     let wakeLock: { release: () => Promise<void> } | null = null;
@@ -84,6 +110,8 @@ export const useKitchenMode = (steps: string[]) => {
       if (transcript.includes('next')) {
         setCurrentStep(prev => {
           const next = Math.min(prev + 1, steps.length - 1);
+          currentStepRef.current = next;
+          readStep(next);
           return next;
         });
       } else if (
@@ -91,7 +119,12 @@ export const useKitchenMode = (steps: string[]) => {
         transcript.includes('previous') ||
         transcript.includes('before')
       ) {
-        setCurrentStep(prev => Math.max(prev - 1, 0));
+        setCurrentStep(prev => {
+          const prevIdx = Math.max(prev - 1, 0);
+          currentStepRef.current = prevIdx;
+          readStep(prevIdx);
+          return prevIdx;
+        });
       } else if (transcript.includes('repeat') || transcript.includes('again')) {
         readStep(currentStepRef.current);
       }
@@ -120,11 +153,22 @@ export const useKitchenMode = (steps: string[]) => {
 
   // Navigation: just update state; the useEffect above handles reading
   const handleNext = useCallback(() => {
-    setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
+    setCurrentStep(prev => {
+      const next = Math.min(prev + 1, steps.length - 1);
+      currentStepRef.current = next;
+      // speak immediately
+      readStep(next);
+      return next;
+    });
   }, [steps.length]);
 
   const handlePrev = useCallback(() => {
-    setCurrentStep(prev => Math.max(prev - 1, 0));
+    setCurrentStep(prev => {
+      const prevIdx = Math.max(prev - 1, 0);
+      currentStepRef.current = prevIdx;
+      readStep(prevIdx);
+      return prevIdx;
+    });
   }, []);
 
   return { currentStep, handleNext, handlePrev, isListening, setIsListening, readStep };
