@@ -177,16 +177,16 @@ Open [http://localhost:3000](http://localhost:3000) 🍳
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/foodzilla
 
 # LLM provider (whichever you use)
-OPENAI_API_KEY=sk-...
+HF_API_KEY=hf-...
 # or
-ANTHROPIC_API_KEY=sk-ant-...
+
 
 # YouTube Data API (for visual guides)
 YOUTUBE_API_KEY=AIza...
 
 # NextAuth (if using auth)
-NEXTAUTH_SECRET=your-secret
-NEXTAUTH_URL=http://localhost:3000
+TOKEN_SECRET=your-secret
+
 ```
 
 ---
