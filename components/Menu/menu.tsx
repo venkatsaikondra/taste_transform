@@ -100,22 +100,22 @@ const Menu = () => {
 export default Menu;*/
 
 "use client"
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import Styles from './menu.module.css'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { User } from 'lucide-react'
+import { User, Menu as MenuIcon, X } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Menu = () => {
     const menuBar = useRef<HTMLDivElement>(null);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useGSAP(() => {
-        // Navbar Hide/Show on Scroll logic
-        const showAnim = gsap.from(menuBar.current, { 
+        const showAnim = gsap.from(menuBar.current, {
             yPercent: -100,
             paused: true,
             duration: 0.3,
@@ -134,9 +134,10 @@ const Menu = () => {
     return (
         <nav className={Styles.menu_bar} ref={menuBar}>
             <div className={Styles.menu_logo}>
-                <Link href="/"><h1>FOODZILLA</h1></Link>
+                <Link href="/">
+                    <h1>FOODZILLA</h1>
+                </Link>
             </div>
-        
 
             <div className={Styles.menu_controls}>
                 <Link href="/predict" className={Styles.nav_link}>VISION</Link>
@@ -146,6 +147,24 @@ const Menu = () => {
                 <Link href="/profile" className={Styles.profile_icon}>
                     <User size={20} />
                 </Link>
+            </div>
+
+            <button
+                type="button"
+                className={Styles.menu_toggle}
+                onClick={() => setMenuOpen(prev => !prev)}
+                aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={menuOpen}
+            >
+                {menuOpen ? <X size={20} /> : <MenuIcon size={20} />}
+            </button>
+
+            <div className={`${Styles.mobile_menu} ${menuOpen ? Styles.open : ''}`}>
+                <Link href="/predict" className={Styles.mobile_link} onClick={() => setMenuOpen(false)}>VISION</Link>
+                <Link href="/dashboard" className={Styles.mobile_link} onClick={() => setMenuOpen(false)}>DASHBOARD</Link>
+                <Link href="/community" className={Styles.mobile_link} onClick={() => setMenuOpen(false)}>COMMUNITY</Link>
+                <Link href="/fridge" className={Styles.mobile_link} onClick={() => setMenuOpen(false)}>OPEN FRIDGE</Link>
+                <Link href="/profile" className={Styles.mobile_link} onClick={() => setMenuOpen(false)}>PROFILE</Link>
             </div>
         </nav>
     )

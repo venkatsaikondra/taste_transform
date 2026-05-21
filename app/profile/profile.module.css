@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rem 2rem 2rem;
+  padding: 6rem 1.25rem 2rem;
   background: #0a0a0a;
 }
 
@@ -142,11 +142,11 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   .profileCard {
-    padding: 2rem;
+    padding: 1.25rem;
   }
 
   .title {
@@ -154,8 +154,8 @@
   }
 
   .avatar {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
   }
 
   .avatar svg {

@@ -54,7 +54,7 @@ export default function RootLayout({
         {/* Loading Counter sits on top */}
         
         <Menu />
-        {children}
+        <main className="pt-24 min-h-screen overflow-x-hidden">{children}</main>
         <Chat />
       </body>
     </html>

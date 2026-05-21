@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: #0a0a0f;
-  padding: 4rem 2rem;
+  padding: 3.5rem 1rem;
   color: white;
   font-family: 'Courier New', monospace;
   display: flex;
@@ -63,6 +63,12 @@
   border-radius: 8px;
   position: relative;
   animation: slideUp 0.5s ease-out;
+}
+
+@media (max-width: 640px) {
+  .uploadBox { height: 180px; border-radius: 12px; }
+  .resultCard { padding: 1rem; border-radius: 12px; }
+  .glitchTitle { font-size: 1.05rem; }
 }
 
 .neonDot {

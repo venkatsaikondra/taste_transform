@@ -121,6 +121,26 @@
     gap: 10px;
 }
 
+/* Mobile: make chat window stretch and sit above nav */
+@media (max-width: 640px) {
+    .chat_wrapper { right: 1rem; bottom: 1rem; }
+    .chat_trigger { width: 52px; height: 52px; }
+    .chat_window {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 80px;
+        right: auto;
+        width: calc(100vw - 2rem);
+        height: 60vh;
+        border-radius: 12px;
+    }
+    .chat_content { padding: 0.75rem; }
+    .chat_header { padding: 0.8rem; }
+    .chat_footer { padding: 0.6rem; gap: 8px; }
+    .message_bubble { font-size: 13px; }
+}
+
 .chat_input {
     flex: 1;
     background: #222;

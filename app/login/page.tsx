@@ -42,21 +42,21 @@ export default function LoginPage() {
 };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#050505] px-4 font-mono">
+    <div className="flex min-h-screen items-center justify-center bg-[#050505] px-4 py-8 sm:px-6 sm:py-12 font-mono">
       {/* Background Grid */}
       <div className="fixed inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(#c5fb45 1px, transparent 1px), linear-gradient(90deg, #c5fb45 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-      <div className="relative w-full max-w-md border border-zinc-800 bg-black/80 p-8 backdrop-blur-xl">
+      <div className="relative w-full max-w-sm sm:max-w-md border border-zinc-800 bg-black/80 p-6 sm:p-8 backdrop-blur-xl rounded-[28px] shadow-2xl shadow-black/40 overflow-hidden">
         {/* Tech Corner Accents */}
         <div className="absolute -left-1 -top-1 h-4 w-4 border-l-2 border-t-2 border-[#c5fb45]" />
         <div className="absolute -right-1 -bottom-1 h-4 w-4 border-r-2 border-b-2 border-[#c5fb45]" />
 
-        <div className="mb-8">
-          <h1 className="text-2xl font-black tracking-tighter text-white">USER_AUTHENTICATION</h1>
-          <p className="text-xs uppercase tracking-widest text-zinc-500">Identity verification required</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-white">USER_AUTHENTICATION</h1>
+          <p className="text-[10px] sm:text-xs uppercase tracking-widest text-zinc-500">Identity verification required</p>
         </div>
 
-        <form onSubmit={onLogin} className="space-y-6">
+        <form onSubmit={onLogin} className="space-y-5">
           <div className="group">
             <label className="text-[10px] uppercase text-[#c5fb45]">Email_Address</label>
             <input
@@ -82,13 +82,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#c5fb45] py-4 text-xs font-bold uppercase tracking-widest text-black transition-all hover:bg-[#d4ff6b] active:scale-95 disabled:opacity-50"
+            className="w-full bg-[#c5fb45] py-3 sm:py-4 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-black transition-all hover:bg-[#d4ff6b] active:scale-95 disabled:opacity-50"
           >
             {loading ? "Decrypting..." : "Initialize_Login"}
           </button>
         </form>
 
-        <p className="mt-8 text-center text-[10px] uppercase tracking-widest text-zinc-600">
+        <p className="mt-6 text-center text-[10px] uppercase tracking-widest text-zinc-600">
           No records found? <Link href="/signup" className="text-white hover:text-[#c5fb45]">Sign_Up</Link>
         </p>
       </div>
